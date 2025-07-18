@@ -1,0 +1,19 @@
+---
+title: "C 1"
+author: "Jose A Melchor Soto"
+format: html
+editor: visual
+---
+
+# Análisis de Riesgo
+## Clase 1
+José Armando Melchor Soto
+
+```{r}
+1 + 1
+```
+
+```{r}
+#| echo: false
+2 * 2
+```
