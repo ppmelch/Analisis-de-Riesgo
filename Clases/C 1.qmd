@@ -8,7 +8,7 @@ editor: visual
 # Análisis de Riesgo
 ## Clase 1
 José Armando Melchor Soto
-
+5
 ```{r}
 1 + 1
 ```
@@ -16,4 +16,8 @@ José Armando Melchor Soto
 ```{r}
 #| echo: false
 2 * 2
+```
+
+```{r}
+lol
 ```
