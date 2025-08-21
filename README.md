@@ -1,2 +1,1 @@
-# Analisis-de-Riesgo
 
