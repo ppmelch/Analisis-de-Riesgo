@@ -1,0 +1,56 @@
+---
+title: "C 1"
+author: "Jose A Melchor Soto"
+format: html
+editor: visual
+---
+
+# Análisis de Riesgo
+
+## Clase 1
+
+José Armando Melchor Soto
+
+### What is risk?
+
+Risicare , dare to walk a dangerous path
+
+### Risk Connotation
+
+-   **Negative** : Risk is the possibility that adverse consequences will occur.
+
+-   Opportunity , of **PROFIT**.
+
+-   For example, betting the course grade on a toss.
+
+**Risk is the uncertainty about future results.** **Probability of obtaining a negative result that expected.**
+
+### Risk...
+
+-   FINANCE; potential losses managing a portfolio.
+-   MEASUREMENT; probability of a loss in the future.
+
+The essence of risk management is to measure the probability of loss in contexts of uncertainty .
+
+### Example
+
++---------+------------------------+-------------------------+-------------+
+| Project | Initial Capital Outlay | Internal rate of return | Probability |
++=========+========================+=========================+=============+
+| A       | 100                    | 16%                     | 100%        |
++---------+------------------------+-------------------------+-------------+
+| B       | 100                    | 11%                     | 50%         |
+|         |                        |                         |             |
+|         |                        | 21%                     | 50%         |
++---------+------------------------+-------------------------+-------------+
+| C       | 100                    | -9%                     | 50%         |
+|         |                        |                         |             |
+|         |                        |                         | 50%         |
++---------+------------------------+-------------------------+-------------+
+
+Internal rate of return is a random variable. Therefore, its expected value can be obtained.
+
+-   **Which project is the best investment**
+-   **Investors are risk averse! True or false?**
+
+## 
