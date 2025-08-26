@@ -1,0 +1,31 @@
+---
+title: "C 3"
+format: html
+editor: visual
+---
+
+### What's the financial system?
+
+It's a intermediary between company's & people.
+
+### Mexican Financial System
+
+- The main actors in Mexico's Financial System are
+  - Bank of Mexico. (Banco de México)
+  - Secretariat of Finance and Public Credit. (Secretaria de Haciedna y Crédito Público)
+  - National Baking and Securities Commission. (Comisión Nacional Bancaria y de Valores)
+  - National Insurance and Bond Commission. (Comisión Nacional de Seguros y Fianzas)
+  - National Commission of Retirement Savings Systems. (Comisión Nacional de Sistemas para el Ahorro Para el Retiro)
+  - Private Banking Institutions (Instituciones de Banca Privada)
+
+
+### Fobaproba -> IPAB 
+- El fondo Bancario de Protección del Ahorro (Fobaproba), creado en 1990 , surgió como una respuesta para enfrentar posibles crisis financieras, en el supuesto que estas representarán un riesgo a la liquidez de lso bancos , en caso de suceder el fondo se utilizaría para comprar las deudas de los bancos y otorgarles capital. (Bancos y gobierno, bonos emitidos para pagar la deuda)
+
+- Se implementó en 1995 para hacer frente a la crisis y evitar quiebra financiera generalizada; se otorgaron subsidios, compraron deuda de los bancos y se protegió el dinero de los ahorradores.
+
+- Instituto para la Protección del Ahorro Bancario (IPAB) procura que las personas ahorradoras conserven el valor de su patrimonio en caso de que un banco se ubique en una situación de quiebra (400,000 UDIS).
+
+- The Nation Banking and Securities Commission (CNBV) is an agency that is part of the Federal Government and whose functions are to monitor (supervise) and regulate the entities that are part of the Mexican financial system to achieve its stability...
+
+
