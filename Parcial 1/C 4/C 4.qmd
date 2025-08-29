@@ -1,0 +1,187 @@
+---
+title: "C 4"
+format: html
+editor: visual
+---
+
+### Basel Accord I
+
+-   **Two fundamentals points:**
+
+    -   Common measurement of regulatory capital to mitigate credit risk
+    -   Minimum solvency ratio
+    -   Strengthen the banking system and eliminate competitive inequalities between banks
+    -   A minimum capital requirement was established that a banking entity should have based on the risks it faced
+    -   Capital of 8% of the assets (for each dollar of credit there must be 8 cents in the capital)
+    -   It is a capital-risk relationship, where the capital is classified into two levels:
+        -   Tier 1 (secure source of financing)
+        -   Tier 2 (less secure sources of financing).
+    -   Considers a single type of risk "Credit“
+    -   Regarding credit risk, 5 categories are weighted: 0, 10, 20, 50 and 100. The total risk is the sum of the risk weighting by the book value of each asset, it must be fulfilled that the minimum solvency ratio , must be:
+
+    $$\frac{Total Cap}{Risk} = \frac{Tier 1 + Tier 2}{\Sigma^{n}_{i=1} w_{i} A_{i}} = 8% $$
+
+    -   **Nivel 1:** Es el componente más seguro y de mayor calidad (reservas de capital, acciones, reservas patrimoniales).
+
+    -   **Nivel 2:** Capital para absorber pérdidas solo en caso de liquidación del banco (bonos de largo plazo).
+
+    -   Regulatory Capital / Risk-Weighted Assets = 8%
+
+    -   Basel I is a simple standard, based on a single coefficient. Unfortunately, it proved to be insufficient due to the proliferation of increasingly sophisticated instruments.
+
+### Basel Accord II
+
+-   Incorporates market risk and operational risk to risk measurements.
+    -   Consider three fundamental pillars:
+        -   Pillar I: Minimum capital requirements, to face market, credit and operational risks.
+        -   Pillar II: Supervision, guidelines for supervisory authorities to promote best practices in risk management.
+        -   Pillar III: Market discipline, considers disclosure requirements to assess basic capital information, exposure and risk assessment.
+        -   Capitalization index, greater than 8%
+-   **Credit risk measurement**
+    -   The Standard method , based on credit risk weights:
+    -   Internal method (Based on internal bank ratings):
+        -   Basic (IRB)
+
+        -   Advance (AIRB)
+-   **The Standard Method :**
+    -   Prescribes the use of external credit ratings to determine the risk weight of some exposures.
+-   **Internal Methods:**
+    -   Based on internal bank ratings
+        -   **The probability of default (PD)** is a credit rating measure that is\
+            assigned internally with the objective of estimating the probability\
+            of default (5 years)
+        -   **Severity, loss given default, (LGD)** it is defined as the\
+            percentage of the exposure at risk that is not expected to be\
+            recovered in the event of default (7 years)
+        -   **Exposure at default (EAD)** is defined as the amount of\
+            outstanding debt at the time of customer default
+        -   **Credit term (M)**
+
++------------------+:-----------------------------+:------------:+
+| # Risk Bands     | # Rating                     | # Percentaje |
++------------------+------------------------------+--------------+
+| Sovereign risks\ | AAA to AA-                   | 0%           |
+| such as public\  |                              |              |
+| debt             |                              |              |
++------------------+------------------------------+--------------+
+|                  | A+ to A-                     | 20%          |
++------------------+------------------------------+--------------+
+|                  | BBB+ to BBB-                 | 50%          |
++------------------+------------------------------+--------------+
+|                  | BB+ to B-                    | 100%         |
++------------------+------------------------------+--------------+
+|                  | Below B- or not rated.150%\| | 150%         |
++------------------+------------------------------+--------------+
+
+-   They are base on four parameters ; probability of default (PD) , Loss given default (LGD) , exposure at default (EAD) , credit term (M)
+
+$$k = [LGD * N(\frac{G(PD)+\sqrt{R}*G(0.999))}{\sqrt{1-r}})-(LGD*PD)]*[\frac{1+(M-2.5)*b}{1-1.5*b}]$$
+
+Donde: - N(x) es = la distribución acumulada normal estándar - G(z)= denota la función de distribución acumulada inversa , es decir, es el valor de x tal que N(x) = z - M = es el vencimiento efectivo. La correlación R y un ajuste por vencimiento b.
+
+-   **Market risk measurement**
+    -   Standard method
+    -   Internal models based on VaR (Value at Risk)
+
+. **IRB-AIRB. Credit RIsk**
+
++-----------------------------------------+---------------+-----------------+
+| ## Indicadores Cuantitativos            | ## IRB Básico | ## IRB Avanzado |
++-----------------------------------------+---------------+-----------------+
+| Probabilidad de Incumplimiento (PD)     | Entidad       | Entidad         |
++-----------------------------------------+---------------+-----------------+
+| Pérdida en caso de Incumplimiento (LGD) | Supervisor    | Entidad         |
++-----------------------------------------+---------------+-----------------+
+| Exposición al Incumplimiento (EAD)      | Supervisor    | Entidad         |
++-----------------------------------------+---------------+-----------------+
+| Vencimiento Efectivo (M)                | Supervisor    | Entidad         |
++-----------------------------------------+---------------+-----------------+
+
+-   In the basic approach, only one of the indicators is calculated by the financial entity, the rest are calculated by the supervisory entity. On the other hand, the advanced approach allows the estimation of the 4 parameters by the financial entity.
+
+-   **Market risk measurement**
+
+    -   Standard method:
+
+        -   This method breaks down assets into different risk categories and assigns predetermined weighting **factors according to their volatility.**
+
+    -   Internal models based on VaR (Value at Risk)
+
+        -   Daily VaR estimation (Value at Risk)
+
+        -   With 99% confidence
+
+        -   10 day maintenance period
+
+        -   Minimum history of 1 year to calculate them
+
+        -   There isn't a special model
+
+        -   Tension and stress tests
+
+-   **Operation risk measurement**
+
+    -   **Basic Indicator method**
+
+        -   Basic indicator approach. 15 % of the income of the last three years with income greater than zero.
+
+    -   **Standardized method**
+
+        -   Standardized indicator approach. Divides income into 8 lines of business
+
+    -   **Internal advanced models**
+
+        -   It requires the accumulation of data on the losses in each of the eight lines of business
+
+### Basel Accord III
+
+-   Published in December 2010
+
+-   It arises as a measure of the 2007-2009 crisis and constitutes a\
+    corrective to what was not considered important before those\
+    dates, especially in the areas of quality and sufficiency of capital,\
+    liquidity risk, and leverage.
+
+-   Credit, market and operational risks are considered again.
+
+-   The minimum capitalization index that banks must maintain is\
+    10.5%. (Capital conservation buffer: An additional 2.5% of capital\
+    was added to absorb losses during crises.)
+
+-   Systemic banks are asked for an extra percentage
+
+-   The regulatory authority of each country will determine a supplementary\
+    percentage of counter-cyclical capital that is defined according to its\
+    economic situation.
+
+-   A leverage ratio takes the available capital and divides it by the total\
+    assets. The banks were expected to maintain a leverage ratio in excess of\
+    3% (Por cada 100 dolares de activos, el banco debe mantener al menos 3\
+    dolares en capital nivel 1, para evitar el endeudamiento excesivo)
+
+-   The crisis showed the importance not only of adequate levels of capital,\
+    but also of having liquidity. Therefore, two indicators were established for\
+    this purpose:
+
+    -   CCL (LCR) is the liquidity coverage ratio, which was designed to\
+        promote resilience against potential liquidity disruptions over a 30-day\
+        period.
+
+    -   CFEN (NSFR) is the net stable funding ratio, which requires banks to\
+        maintain a minimum of stable funding sources in accordance with the\
+        liquidity profiles of their assets\
+
+    Both must be greater than 100%
+
+### **Liquidity Risk**
+
+-   **Indicator I: Liquidity coverage ratio**
+
+    $$LCR = \frac{Existencia*de*activos *liquidos *de *alta* calidad}{Salidas *netas *de *efectivo* en *los* siguientes* 30 días}$$
+
+    -   Garantiza que los bancos tengan suficientes activos líquidos para resistir crisis a corto plazo.
+    -   LCR, always greater than 100. That is, the pool of high-quality assets must be at least equal to the potential net cash outflows in a stress situation in the next 30 days
+
+-   **Indicator II: Net stable funding ratio** $$NSFR = \frac{Cantidad*disponible*de*fondeo*estable}{Cantidad *requerida* de* fondeo* estable}$$
+
+-   Asegura estabilidad de la estructura de financiamiento a largo plazo
