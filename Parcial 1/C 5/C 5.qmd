@@ -1,0 +1,88 @@
+---
+title: "C 5"
+format: html
+editor: visual
+---
+
+## Hechos Estilizados del Precio y Rendimiento
+
+**Hecho estilidazado 1:** Los precios de los activos y el valor de los portafolios siguen una caminata aleatoria.
+
+$$
+S_t = S_{t-1} + \epsilon_{t}
+$$
+
+Where
+
+$$
+E[\epsilon_{t} = 0] 
+$$
+
+y
+
+$$E[\epsilon_{t} , \epsilon_{t-2} ] = Cov[\epsilon_t , \epsilon_{t-2}] $$
+
+**Hecho esterilizado 2** : La distribución de lso rendimientos tiene una forma aproximadamente acampanada
+
+**Hecho esterilizado 3**: Los rendimientos de lso activos presentan volatilidad no constante y agrupada
+
+**Hecho esterilizado 4 :** La distribución de los rendimientos presenta leptocurtosis.
+
+------------------------------------------------------------------------
+
+#### Caminata Aleatoria
+
+Simularemos una caminata aleatoria
+
+$$ S_t = S_{t-1} + \epsilon_{t} $$
+
+```{r}
+n <- 100
+so <- 25
+epsilon <- rnorm(n,0,1)
+st <- so+cumsum(epsilon)
+
+plot(st, type= 'l', xlab = "Tiempo" , ylab= "Precio", main= "Caminata Aleatoria", col = "blue")
+
+```
+
+\
+Vamos a comparar este compartamiento con uno de un activo de verdad
+
+```{r}
+library(quantmod)
+ticker <- getSymbols("GFNORTEO.MX", src = "yahoo", auto.assign = FALSE)
+
+plot(Ad(ticker), main = "Precio de cierre GFNORTEO.MX", xlab= "Tiempo", ylab="Precio", col="blue")
+
+
+```
+
+**Hecho 2:** Aquí voy a poner lo que dice el hecho 2
+
+```{r}
+precio <- Ad(ticker)
+rendimiento <- diff(log(precio))
+
+hist(rendimiento, n= 100 , col="skyblue",prob=TRUE, xlab="Clases de rendimiento")
+
+lines(density(rendimiento, na.rm = TRUE), col = "red", lwd = 2)
+```
+
+Esto prueba el hecho estirilizado 2 y el hecho 4 , que dice ...
+
+```{r}
+hist(precio)
+```
+
+```{r}
+plot()
+```
+
+```{r}
+
+mensualmente <- to.monthly(precio)
+chart_Series(mensualmente, name= ticker)
+add_BBands()
+
+```
