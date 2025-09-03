@@ -1,0 +1,117 @@
+---
+title: "Proyecto pt.1"
+format: html
+editor: visual
+autor: José A Melchor Soto
+---
+
+### Librerías
+
+```{r}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+
+```
+
+### Importación de Datos Trimestrales
+
+```{r}
+getSymbols("GFINBURO.MX", src = "yahoo", from = "2019-01-01", to = "2025-01-01")
+
+precios <- Cl(`GFINBURO.MX`)
+
+precios_Q <- to.quarterly(precios, indexAt = "lastof", OHLC = FALSE)
+head(precios_Q)
+```
+
+```{r}
+
+ret_diarios <- dailyReturn(precios)
+ret_trimestrales <- apply.quarterly(ret_diarios, function(x) prod(1 + x) - 1)
+
+ret_df <- data.frame(
+  Fecha = as.Date(index(ret_trimestrales)),
+  TotalReturn = coredata(ret_trimestrales)
+)
+head(ret_df)
+
+```
+
+```{r}
+
+ret_diarios <- dailyReturn(precios)
+ret_trimestrales <- apply.quarterly(ret_diarios, function(x) prod(1 + x) - 1)
+
+ret_df <- data.frame(
+  Fecha = as.Date(index(ret_trimestrales)),
+  TotalReturn = as.numeric(coredata(ret_trimestrales))
+)
+
+fin_final <- read_csv("Financieros.csv", show_col_types = FALSE) %>%
+  rename(NetIncome = `Net Income`) %>%
+  mutate(
+    NetIncome = as.numeric(NetIncome),
+    Shares    = as.numeric(Shares),
+    EPS       = NetIncome / Shares
+  ) %>%
+  mutate(
+    Fecha = as.Date(c("2019-03-29","2019-06-28","2019-09-30","2019-12-31","2020-03-31"))
+  ) %>%
+  left_join(ret_df, by = "Fecha") %>%
+  rename(`Shares Outstanding` = Shares) %>%
+  mutate(Trimestre = paste0("Q", quarter(Fecha))) %>%
+  select(Trimestre, Fecha, TotalReturn, `Shares Outstanding`, EPS)
+
+print(fin_final)
+
+```
+
+### Importación de Datos Anuales
+
+```{r}
+
+precios_Q <- to.yearly(precios, indexAt = "lastof", OHLC = FALSE)
+head(precios_Q)
+
+```
+
+```{r}
+ret_diarios <- dailyReturn(precios)
+ret_anual <- apply.yearly(ret_diarios, function(x) prod(1 + x) - 1)
+
+
+ret_df <- data.frame(
+  Fecha = as.Date(index(ret_anual)),
+  TotalReturn = coredata(ret_anual)
+)
+head(ret_df)
+```
+
+```{r}
+
+
+fin <- read_csv("Financieros0.csv", show_col_types = FALSE) %>%
+  rename(NetIncome = `Net Income`) %>%
+  mutate(
+    NetIncome = as.numeric(NetIncome),
+    Shares    = as.numeric(Shares),
+    EPS       = NetIncome / Shares
+  )
+
+fin_final <- fin %>%
+  mutate(Fecha = as.Date(c("2024-12-31","2023-12-29","2022-12-30","2021-12-31"))) %>%
+  left_join(ret_df, by = "Fecha") %>%
+
+  rename(
+    TotalReturn         = `daily.returns`,
+    `Shares Outstanding` = Shares
+  ) %>%
+
+  select(Fecha, TotalReturn, `Shares Outstanding`, EPS)
+
+print(fin_final)
+
+
+```
