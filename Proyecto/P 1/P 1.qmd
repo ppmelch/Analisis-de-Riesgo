@@ -68,6 +68,14 @@ print(fin_final)
 
 ```
 
+```{r}
+plot(fin_final$Fecha, fin_final$EPS,
+     type = "b", col = "blue", pch = 20,
+     xlab = "Fecha", ylab = "EPS",
+     main = "Earnings Per Share (EPS)")
+
+```
+
 ### Importación de Datos Anuales
 
 ```{r}
@@ -114,4 +122,11 @@ fin_final <- fin %>%
 print(fin_final)
 
 
+```
+
+```{r}
+plot(fin_final$Fecha, fin_final$EPS,
+     type = "b", col = "blue", pch = 20,
+     xlab = "Fecha", ylab = "EPS",
+     main = "Earnings Per Share (EPS)")
 ```
