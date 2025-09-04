@@ -57,7 +57,7 @@ fin_final <- read_csv("Financieros.csv", show_col_types = FALSE) %>%
     EPS       = NetIncome / Shares
   ) %>%
   mutate(
-    Fecha = as.Date(c("2019-03-29","2019-06-28","2019-09-30","2019-12-31","2020-03-31"))
+    Fecha = as.Date(c("2024-06-28","2024-09-30","2024-12-31","2025-03-30","2025-06-30"))
   ) %>%
   left_join(ret_df, by = "Fecha") %>%
   rename(`Shares Outstanding` = Shares) %>%
