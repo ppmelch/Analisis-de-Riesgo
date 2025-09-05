@@ -1,145 +1,126 @@
 ---
-title: "HW 2"
+title: "T 6"
 format: html
 editor: visual
-autor: José A Melchor Soto
+autor: José Armando Melchor Soto
 ---
 
-## Análisis Formal del Rendimiento de Activos Financieros (Acciones)
+## HW 2 : Basel Accords
 
-Sea $S_1, S_2,...,S_n$ el precio diario de un activo durante n dias , es posible calcular el rendimiento diario haciendo: $$R_i = \frac{S_i}{S_i-1} = \frac{\Delta{S}}{S} $$ $\Delta{S} =$La diferencias de precios
+-   *In what year was Basel I established?*
 
-S= Es el precio inicial
+    July **1988**
 
-El rendimiento diario , también se puede aproximar haciendo $$R_i = ln(S_i)-ln(S_{i-1})$$ Como hay $n(S_i)$ , la diaria del rendimiento tiene: n-1 elementos.
+-   *How many, and what types of risk did Basel I consider?*
 
-$\mu= \frac{1}{n-1} \sum R_i$
+    Basel I considers a single one type of risk.
 
-$\sigma^2 = \frac{1}{n-1} \sum{(R_i - \mu)^2}$
+    -   Credit Risk
 
-De manera intuitiva sabemos que hay una relación entre el rendimiento y el tiempo.
+-   *What was the minimum risk capital required?*
 
-$$
-R_i = \mu \Delta t
-$$
+    A banking entity should maintain 8% minimum capital adequacy ratio, based on the risks it faced
 
-$$
-\frac{\Delta{S}}{S} = \mu{\Delta}{t}
-$$
+-   *How many categories of credit risk did Basel I consider?*
 
-$$
-\Delta{S} = S \mu \Delta t
-$$
+    5 categories of credit risk, each with different risk weight:
 
-Entonces con la ecuación
+    -   0%
+        -   cash, goverment loans
+    -   10%
+        -   independent from central goverment entities loans, weights are local
+    -   20 %
+        -   OCDE incorporated , Banks loans, accounts, receivable, etc
+    -   50 %
+        -   mortage loans
+    -   100 %
+        -   private sector, off-balance sheet as credit equivalent, etc
 
-$$dS= S\mu dt$$
-
-Resolviendo la ecuación diferencial:
-
-$$
-\frac{dS}{S} = \mu t
-$$
-
-$$
-\int \frac{dS}{S} =\int \mu t
-$$
-
-$$
-ln(S) = \mu t + C
-$$
-
-$$
-e^{ln(s)}e^{\mu t + C}
-$$
-
-$$
-S = e^{ut} e^C S_o
-$$
-
-$$
-S= S_o e^{\mu t}
-$$
+    The total risk is the sum of the risk weighting by the book value of each asset, it must be fulfilled that the minimum solvency ratio
 
 ------------------------------------------------------------------------
 
-Considerando ahora la varianza tenemos que :
+-   *In what year was Basel II established?*
 
-## $$ \frac{dS}{S} = \mu dt + \sigma dW $$
+    June **2004**
 
-Supongamos que hemos estimado el rendimiento anual de un activo como 16% y que tiene una volatilidad del 30%
+-   *How many, and which, were the fundamental pillars of Basel II?*
 
-\$\mu = 16 $%$\sigma = 30\$% Anual
+There are three fundamental pillars of Basel II , they say :
 
-La ecuacion que modela el cambio anual en el precio es: \$dS = S(0.16) dt + S(0.3) dW \$
+**Pillar I :** It needs minimum capital requirements , to face market , credit and operational risk
 
-Para 1 año , $dt = 1$
+**Pillar II:** Supervision to promote best practices in risk management.
 
-$dS = 0.16 S + 0.3 S \epsilon$
+**Pillar III:** Market discipline, considers disclosure requirements to assess basic capital information, exposure and risk assessment
 
-Para 6 meses , $dt = 0.5$
+-   *How many, and what types of risk did Basel II consider?*
 
-\$ dS= 0.8 S + 0.3 S \sqrt{\frac{1}{2}} \$
+They consider 3 types of risk:
 
-Para 1 día , \$ dt= \frac{1}{252} \$
+-   Credit risk
 
-$$ dS= .016~S(\frac{1}{252}) +0.3~S\sqrt{\frac{1}{252}} \epsilon $$
+-   Operational Risk
 
-El activo descrito tuvo el dia 4 de sep un precio de 50 , escribe la ecuación que modela el cambio para el dia 5 de sep.
+-   Market risk
 
-$$dS = 0.16(0.50)(\frac{1}{252}) + 0.30 (0.50) \sqrt{\frac{1}{252}} \epsilon$$ $$dS~N =( 0.16~(0.50)(\frac{1}{252})) ,( 0.30 ~(0.50) \sqrt{\frac{1}{252}})^2$$
+-   *What are the types of methods that were used in Basel II to measure risk?*
 
-Precio Esperado para el 5 de Sept $$E[dS]= 0.0317$$ $$E[S]= S_o + E[dS]= 50.0317$$ \* Probabilidad que el precio sea mayor a 50.5
+<!-- -->
 
-$$
-P(S > 50.5) \;=\; P(dS > 0.5) \;=\; 
-P\!\left( Z \;>\; \frac{0.5 - 0.0317}{0.3 \cdot 50 \cdot \sqrt{\tfrac{1}{252}}} \right)
-$$
+-   **Credit risk measurement**
+    -   The Standard method , based on credit risk weights:
+    -   Internal method (Based on internal bank ratings):
+        -   Basic (IRB)
 
-```{r}
+        -   Advance (AIRB)
 
-num   <- 0.5 - 0.0317
-den   <- 0.3 * 50 * sqrt(1/252)
-z_val <- num / den
+<!-- -->
 
-p <- 1 - pnorm(z_val)   
-p
+-   **Market risk measurement**
 
-```
+    -   Standard method
+    -   Internal models based on VaR (Value at Risk)
 
-ó
+-   **Operation risk measurement**
 
-```{r}
-1-pnorm(0.5, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) )
-```
+    -   **Basic Indicator method**
 
-Calcular la probabilidad de que el precio se ubique entre 50.5 y 51
+        -   Basic indicator approach. 15 % of the income of the last three years with income greater than zero.
 
-```{r}
-pnorm(1, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) ) - pnorm(0.5, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) )
-```
+    -   **Standardized method**
 
-Probabilidad de que el precio disminuya
+        -   Standardized indicator approach. Divides income into 8 lines of business
 
-```{r}
-pnorm(0, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) ) 
-```
+    -   **Internal advanced models**
 
-La ecuación del cambio ews
+        -   It requires the accumulation of data on the losses in each of the eight lines of business
 
-```{r}
-epsilon <-  rnorm(10000, 0, 1)
-ds <- 0.0317 + 0.3 * 50 * sqrt(1/252) * epsilon
+<!-- -->
 
+-   *What are the parameters of the internal method for calculating credit risk in Basel II?*
 
-s= 50 + ds
-mean(ds)
-mean(s)
+    **The probability of default (PD)** is a credit rating measure that is\
+    assigned internally with the objective of estimating the probability\
+    of default (5 years)
 
+    **Severity, loss given default, (LGD)** it is defined as the\
+    percentage of the exposure at risk that is not expected to be\
+    recovered in the event of default (7 years)
 
-plot (ds , type = "l")
-```
+    **Exposure at default (EAD)** is defined as the amount of\
+    outstanding debt at the time of customer default
 
-```{r}
-mean(ds<0)
-```
+    **Credit term (M)** effective maturity of an exposure, measured in years.
+
+-   *What is the difference between the basic indicator approach and the standardized approach to calculate operational risk in Basel II?* 
+
+BIA is very simple and only weakly reflects the bank’s true risk profile, whereas TSA is much more risk-sensitive but requires stronger risk-management systems and supervisory approval.
+
+-   *Explain the differences between Basel II and Basel III*
+
+In short: Basel II (2004) made capital more risk-sensitive using risk-weighted assets and internal models for credit, market, and operational risk but it didn’t have a leverage backstop or liquidity rules; Basel III (2010), after the crisis, raised the amount and quality of capital, added capital buffers , introduced a leverage ratio, and set global liquidity standards, so banks can withstand funding shocks.
+
+-   *What is the principal type of risk included in Basel III? Why do you think they included it?*
+
+The principal type of risk include in Basel III is the Liquidity Risk , I think that they included because during the global financial crisis, many banks that seemed well-capitalized still failed because they lacked stable funding and liquid assets. Basel III included liquidity risk to ensure banks could survive sudden funding shocks.
