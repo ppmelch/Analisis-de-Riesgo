@@ -1,8 +1,8 @@
 ---
-title: "T 6"
+title: "HW 2"
 format: html
 editor: visual
-autor: José Armando Melchor Soto
+author: José Armando Melchor Soto
 ---
 
 ## HW 2 : Basel Accords
