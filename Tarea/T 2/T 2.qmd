@@ -1,0 +1,145 @@
+---
+title: "HW 2"
+format: html
+editor: visual
+autor: José A Melchor Soto
+---
+
+## Análisis Formal del Rendimiento de Activos Financieros (Acciones)
+
+Sea $S_1, S_2,...,S_n$ el precio diario de un activo durante n dias , es posible calcular el rendimiento diario haciendo: $$R_i = \frac{S_i}{S_i-1} = \frac{\Delta{S}}{S} $$ $\Delta{S} =$La diferencias de precios
+
+S= Es el precio inicial
+
+El rendimiento diario , también se puede aproximar haciendo $$R_i = ln(S_i)-ln(S_{i-1})$$ Como hay $n(S_i)$ , la diaria del rendimiento tiene: n-1 elementos.
+
+$\mu= \frac{1}{n-1} \sum R_i$
+
+$\sigma^2 = \frac{1}{n-1} \sum{(R_i - \mu)^2}$
+
+De manera intuitiva sabemos que hay una relación entre el rendimiento y el tiempo.
+
+$$
+R_i = \mu \Delta t
+$$
+
+$$
+\frac{\Delta{S}}{S} = \mu{\Delta}{t}
+$$
+
+$$
+\Delta{S} = S \mu \Delta t
+$$
+
+Entonces con la ecuación
+
+$$dS= S\mu dt$$
+
+Resolviendo la ecuación diferencial:
+
+$$
+\frac{dS}{S} = \mu t
+$$
+
+$$
+\int \frac{dS}{S} =\int \mu t
+$$
+
+$$
+ln(S) = \mu t + C
+$$
+
+$$
+e^{ln(s)}e^{\mu t + C}
+$$
+
+$$
+S = e^{ut} e^C S_o
+$$
+
+$$
+S= S_o e^{\mu t}
+$$
+
+------------------------------------------------------------------------
+
+Considerando ahora la varianza tenemos que :
+
+## $$ \frac{dS}{S} = \mu dt + \sigma dW $$
+
+Supongamos que hemos estimado el rendimiento anual de un activo como 16% y que tiene una volatilidad del 30%
+
+\$\mu = 16 $%$\sigma = 30\$% Anual
+
+La ecuacion que modela el cambio anual en el precio es: \$dS = S(0.16) dt + S(0.3) dW \$
+
+Para 1 año , $dt = 1$
+
+$dS = 0.16 S + 0.3 S \epsilon$
+
+Para 6 meses , $dt = 0.5$
+
+\$ dS= 0.8 S + 0.3 S \sqrt{\frac{1}{2}} \$
+
+Para 1 día , \$ dt= \frac{1}{252} \$
+
+$$ dS= .016~S(\frac{1}{252}) +0.3~S\sqrt{\frac{1}{252}} \epsilon $$
+
+El activo descrito tuvo el dia 4 de sep un precio de 50 , escribe la ecuación que modela el cambio para el dia 5 de sep.
+
+$$dS = 0.16(0.50)(\frac{1}{252}) + 0.30 (0.50) \sqrt{\frac{1}{252}} \epsilon$$ $$dS~N =( 0.16~(0.50)(\frac{1}{252})) ,( 0.30 ~(0.50) \sqrt{\frac{1}{252}})^2$$
+
+Precio Esperado para el 5 de Sept $$E[dS]= 0.0317$$ $$E[S]= S_o + E[dS]= 50.0317$$ \* Probabilidad que el precio sea mayor a 50.5
+
+$$
+P(S > 50.5) \;=\; P(dS > 0.5) \;=\; 
+P\!\left( Z \;>\; \frac{0.5 - 0.0317}{0.3 \cdot 50 \cdot \sqrt{\tfrac{1}{252}}} \right)
+$$
+
+```{r}
+
+num   <- 0.5 - 0.0317
+den   <- 0.3 * 50 * sqrt(1/252)
+z_val <- num / den
+
+p <- 1 - pnorm(z_val)   
+p
+
+```
+
+ó
+
+```{r}
+1-pnorm(0.5, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) )
+```
+
+Calcular la probabilidad de que el precio se ubique entre 50.5 y 51
+
+```{r}
+pnorm(1, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) ) - pnorm(0.5, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) )
+```
+
+Probabilidad de que el precio disminuya
+
+```{r}
+pnorm(0, mean= 0.0317, sd= 0.3 * 50 * sqrt(1/252) ) 
+```
+
+La ecuación del cambio ews
+
+```{r}
+epsilon <-  rnorm(10000, 0, 1)
+ds <- 0.0317 + 0.3 * 50 * sqrt(1/252) * epsilon
+
+
+s= 50 + ds
+mean(ds)
+mean(s)
+
+
+plot (ds , type = "l")
+```
+
+```{r}
+mean(ds<0)
+```
