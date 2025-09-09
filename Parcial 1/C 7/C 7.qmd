@@ -6,6 +6,16 @@ editor: visual
 
 ## Clase 7
 
+**Librerías**
+
+```{r}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+```
+
+------------------------------------------------------------------------
+
 Los cambios en los precios de un activo se modelan con la ecuación
 
 $$
@@ -24,6 +34,77 @@ Para calcular estos parametros usaremos como ejemplo GFNORTEO.MX
 
 ```{r}
 
-library(quantmod)
-clave
+clave <- "GFNORTEO.MX"
+datos <- new.env()
+getSymbols(clave, env=datos, from = "2000-01-01")
+precio <- datos[[clave]][,6]
+```
+
+Calcular el rendimiento
+
+$$
+R_t = ln(\frac{S_{t+1}}{S_t})
+$$
+
+```{r}
+rendimiento <- diff(log(precio))
+rendimiento <- na.omit(rendimiento)
+```
+
+Antes de nada veamos como es el rendimiento y como es el precio
+
+Para ver su distribución
+
+```{r}
+hist(precio, xlab = "Rangos Precios", ylab= "Frecuencia", main= paste("Histograma de",clave) , col= "salmon")
+```
+
+```{r}
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma de",clave) , col= "darkblue", n=100)
+
+
+```
+
+como serie de tiempo
+
+```{r}
+plot(precio , col="red")
+```
+
+```{r}
+plot(rendimiento, col = 'darkgreen')
+```
+
+Para calcular $\mu, \sigma$
+
+**Diarios**
+
+```{r}
+mu <- mean(rendimiento)
+sigma <-  sd(rendimiento)
+```
+
+**Anual**
+
+```{r}
+mu_a <- mu*252
+sigma_a <- sigma*sqrt(252)
+```
+
+**Por periodos**
+
+Haremos una trabla con los diferentes valores de rendimiento y volatilidad diarios y anuales
+
+```{r}
+names(rendimiento) <- "rend"
+tabla <- rendimiento %>%
+  as_tibble() %>%
+  mutate(anio= year(rendimiento))%>%
+  group_by(anio)%>%
+  summarise("Rend_diario"= mean(rend),
+            "Rend_Anual"= mean(rend)*252,
+            "Vol_Diaria"= sd(rend),
+            "Vol_Anual" = sd(rend)*sqrt(252))
+
+  
 ```
