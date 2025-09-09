@@ -113,7 +113,7 @@ En el caso especifico del rendimiento m los hechos nos dice que son aproximadame
 
 Para validad o rechazar este supuesto , efectuaremos una prueba de normalidad.
 
-Esta prueba se llama JARQUEBERA y trata de comparar la curtosis y el sesgo de la distribución que estamos analizando con la distribución normal.
+Esta prueba se llama JARQUEBERA y trata de comparar la kurtosis y el sesgo de la distribución que estamos analizando con la distribución normal.
 
 $$
 H_0 : \text{Hay Normalidad}

@@ -1,0 +1,226 @@
+---
+title: "T 3"
+format: 
+  html:
+    toc: true       
+    toc-location: left   
+    number-sections: true  
+
+editor: visual
+execute:
+  echo: false     
+  warning: false  
+  message: false  
+---
+
+# HW 3: Stylized Asset Return Facts
+
+## Libraries
+
+```{r}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+library(moments)
+library(zoo)
+```
+
+## **Assets Selection**
+
+-   **AAPL (Apple Inc.)**: It’s a high-tech company that is traded on the NASDAQ (***United States***).
+
+-   **NESN.SW (Nestlé S.A.)**: It’s a multinational food and beverage company that is traded on the SIX Swiss Exchange (***Switzerland***).
+
+-   **7203.T (Toyota Motor Corp.)**: It’s a leading automotive company that is traded on the Tokyo Stock Exchange (TSE) (***Japan***).
+
+## Data Import
+
+```{r}
+tickers <- c("AAPL","NESN.SW","7203.T")
+
+Datos <- new.env()
+getSymbols(tickers, env=Datos, from= "2010-10-01")
+
+precio <- do.call(merge, lapply(tickers, function(tkr) {
+  Datos[[tkr]][,6]}))
+
+colnames(precio) <- tickers
+
+head(precio)
+```
+
+### Returns
+
+```{r}
+ret <- diff(log(precio))
+ret <- na.omit(ret)
+```
+
+### Prices Hist
+
+```{r}
+for (ticker in colnames(precio)) {
+  hist(precio[, ticker],
+       xlab = "Prices Ranges",
+       ylab = "Frequency",
+       main = paste("Histogram of", ticker, "prices"),
+       col = "salmon")
+}
+```
+
+```{r}
+for (ticker in colnames(ret)) {
+  hist(ret[, ticker],
+       xlab = "Return Ranges",
+       ylab = "Density",
+       main = paste("Histogram of", ticker, "Returns"),
+       col = "skyblue",
+       breaks = 50,
+       prob = TRUE, 
+       border= "white")
+  
+  lines(density(ret[, ticker], na.rm = TRUE),
+        col = "red", lwd =2)
+}
+
+
+```
+
+## **Time Series**
+
+### Prices Series Plot
+
+```{r}
+for (ticker in colnames(precio)) {
+  plot(as.zoo(precio[, ticker]),
+       main = paste("Price Series of", ticker),
+       col  = "salmon",
+       ylab = "Price",
+       xlab = "Date",
+       type = "l")
+}
+```
+
+### Return Series Plot
+
+```{r}
+for (ticker in colnames(ret)) {
+  plot(as.zoo(ret[, ticker]),
+       main = paste("Return Series of", ticker),
+       col  = "salmon",
+       ylab = "Return",
+       xlab = "Date",
+       type = "l")
+}
+
+```
+
+### **Daily**
+
+```{r}
+mu_daily    <- apply(ret, 2, function(x) mean(na.omit(x)))
+sigma_daily <- apply(ret, 2, function(x) sd(na.omit(x)))
+
+
+data.frame(
+           Daily_Mean = mu_daily,
+           Daily_SD   = sigma_daily)
+```
+
+### **Anual**
+
+```{r}
+mu_ann    <- mu_daily * 252
+sigma_ann <- sigma_daily * sqrt(252)
+
+data.frame(
+           Annualized_Mean = mu_ann,
+           Annualized_SD   = sigma_ann)
+```
+
+### **By Period**
+
+```{r}
+
+tabla_por_ticker <- function(data, ticker) {
+  data %>%
+    as_tibble() %>%
+    mutate(fecha = index(data),
+           anio  = year(fecha),
+           rend  = data[, ticker]) %>%
+    group_by(anio) %>%
+    summarise(
+      Rend_Diario = mean(rend, na.rm = TRUE),
+      Rend_Anual  = mean(rend, na.rm = TRUE) * 252,
+      Vol_Diaria  = sd(rend, na.rm = TRUE),
+      Vol_Anual   = sd(rend, na.rm = TRUE) * sqrt(252)
+    )
+}
+
+tabla_AAPL   <- tabla_por_ticker(ret, "AAPL")
+tabla_NESN   <- tabla_por_ticker(ret, "NESN.SW")
+tabla_TOYOTA <- tabla_por_ticker(ret, "7203.T")
+```
+
+## Hypothesis Test
+
+$$ H_0 : \text{Hay Normalidad} $$
+
+$$ H_i : \text{No Hay Normalidad} $$
+
+```{r}
+for (ticker in colnames(ret)) {
+  serie <- na.omit(as.numeric(ret[, ticker]))
+  jb <- jarque.test(serie)
+  
+  cat("\nTicker:", ticker, "\n")
+  print(jb)
+  cat("\n---\n")
+}
+```
+
+According to the results of the Jarque–Bera test, we can statistically reject the null hypothesis, since the p-value is practically zero. Therefore, it can be concluded that the returns of the three tickers do not follow a normal distribution. This implies that the returns exhibit much more extreme values in their tails, which confirms one of the well-known stylized facts of financial time series. There's no normality.
+
+```{r}
+for (ticker in colnames(ret)) {
+  serie <- na.omit(as.numeric(ret[, ticker]))
+  
+  skw  <- skewness(serie)
+  kurt <- kurtosis(serie)
+  
+  cat("\nTicker:", ticker, "\n")
+  cat("Skewness:", skw, "\n")
+  cat("Kurtosis:", kurt, "\n")
+  cat("\n---\n")
+}
+```
+
+For the skewness, it can be concluded that the returns of Apple and Nestlé tend to exhibit more extreme values on the negative side, while the returns of Toyota show a tendency toward more extreme values on the positive side. Regarding the kurtosis, the results indicate a leptokurtic distribution, meaning that all three assets display much more extreme values in their tails compared to a normal distribution.
+
+### **Second hypothesis test**
+
+$$ H_o: \mu =  0 $$
+
+$$ H_i : \mu \neq0 $$
+
+```{r}
+
+for (ticker in colnames(ret)) {
+  serie <- na.omit(as.numeric(ret[, ticker]))
+  
+  test <- t.test(serie, mu = 0, alternative = "two.sided")
+  
+  cat("\nTicker:", ticker, "\n")
+  print(test)
+  cat("\n---\n")
+}
+
+```
+
+According to the results of the test, at the 1% significance level, the null hypothesis cannot be rejected for any of the tickers, since the daily returns are not statistically different from zero. This reinforces the stylized fact that financial returns tend to have means close to zero.
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+In conclusion, the three selected assets exhibit the four stylized facts of financial returns. First, prices follow a behavior close to a random walk, reflecting the lack of memory in the series and the efficiency of price formation. Second, returns display bell-shaped distributions but deviate from normality, showing heavy tails and skewness. Third, volatility is not constant but appears in the form of clustering, with periods of high instability followed by further volatility, and calm periods grouped together. Finally, the distributions show leptokurtosis, meaning a greater concentration of values near the mean and more extreme tails compared to the normal distribution.
