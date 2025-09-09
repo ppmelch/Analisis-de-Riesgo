@@ -1,0 +1,29 @@
+---
+title: "C 7"
+format: html
+editor: visual
+---
+
+## Clase 7
+
+Los cambios en los precios de un activo se modelan con la ecuación
+
+$$
+dS=S\mu dt+S \sigma dw
+$$
+
+Donde :
+
+$$
+dW = \epsilon\sqrt{dt}
+$$
+
+En esta ecuaci´pon los parámetros representan el riesgo \$\\sigma\$ y el rendimiento \$\\mu\$
+
+Para calcular estos parametros usaremos como ejemplo GFNORTEO.MX
+
+```{r}
+
+library(quantmod)
+clave
+```
