@@ -12,6 +12,7 @@ editor: visual
 library(quantmod)
 library(dplyr)
 library(lubridate)
+library(moments)
 ```
 
 ------------------------------------------------------------------------
@@ -105,6 +106,85 @@ tabla <- rendimiento %>%
             "Rend_Anual"= mean(rend)*252,
             "Vol_Diaria"= sd(rend),
             "Vol_Anual" = sd(rend)*sqrt(252))
-
   
+```
+
+En el caso especifico del rendimiento m los hechos nos dice que son aproximadamente de forma acampanada , de lo cual se desprende el supuesto de normalidad del rendimiento.
+
+Para validad o rechazar este supuesto , efectuaremos una prueba de normalidad.
+
+Esta prueba se llama JARQUEBERA y trata de comparar la curtosis y el sesgo de la distribución que estamos analizando con la distribución normal.
+
+$$
+H_0 : \text{Hay Normalidad}
+$$
+
+$$
+H_i : \text{No Hay Normalidad}
+$$
+
+```{r}
+jarque.test(as.numeric(rendimiento))
+```
+
+Como el valor del p-value es muy cercano a cero y este valor representa la probabilidad de cometer el error tipo I (Rechazar \$H_0\$, cuando es verdadera), entonces decido rechazar a cualquier nivel de significancia.
+
+Rechazar $H_0$ significa que **No Hay Normalidad**
+
+La razón de ello , es que los rendimientos tienen sesgo y curtosis.
+
+```{r}
+skewness(rendimiento)
+kurtosis(rendimiento)
+```
+
+El rendimiento promedio diario es casi cero. Vamos a ver si estadisticamente este rendimiento promedio es cero.
+
+$$
+H_o: \mu =  0
+$$
+
+$$
+H_i : \mu \neq0
+$$
+
+```{r}
+t.test(as.numeric(rendimiento, mu = 0 , alternative = "two.sided"))
+```
+
+Con un nivel de tolerancia del 1% , no podemos rechazar \$H_0\$, lo que implica que es muy probable (99%) de que la media sea igual a cero.
+
+Simulación para el precio de mañana usando la ecuación de cambio
+
+```{r}
+epsilon <- rnorm(10000)
+ds <- 173.8500 * 0.0018433441* 1 +173.8500 * 0.01915139* epsilon* sqrt(1)
+plot(ds, type="l")
+S <- 173.8500 + ds
+plot(S, type="l")
+
+```
+
+Precio Esperado
+
+```{r}
+mean(S)
+```
+
+¿Cuál es la probabilidad de que el precio disminuya mañana ?
+
+```{r}
+mean(ds<0)
+```
+
+¿Cuál es la probabilidad de que el precio sea mayor a 174 pesos ?
+
+```{r}
+mean(S>174)
+```
+
+¿Cuál es la probabilidad de que el precio se ubique entre 172.5 y 173 pesos?
+
+```{r}
+mean(172.5<=S & S<173)
 ```
