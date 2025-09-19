@@ -43,7 +43,6 @@ mean(ds>0)
 mean(LnS>log(So))
 ```
 
-\
 Teóricamente
 
 ```{r}
@@ -52,4 +51,99 @@ z <- (0-3.375)/(20.6829)
 1-pnorm(0,mean=3.375,sd = 20.6829)
 ```
 
-\
+------------------------------------------------------------------------
+
+## **Probabilidades Empiricas**
+
+Considera que tenemos un activo que tiene un rendimiento anual del 25% con una volatilidad de 15%. El precio del activo de hoy es de 10 y queremos determinar las probabilidades siguientes :
+
+$$
+ds = S(0.25)~dt + S(0.15)~dW
+$$
+
+Como yo sé que mi activo hoy vale 10 :
+
+$$
+ds = 10(0.25)~dt + 10(0.15)~dW
+$$
+
+Como quiero el comportamiento en un año dt=1:
+
+$$
+ds = 10(0.25)(1) + 10(0.15)~\epsilon \sqrt1
+$$
+
+Puedo aplicar el lema de ITO a este proceso con una función dada por
+
+$$
+G= \text{Ln S}
+$$ Y resulta :
+
+$$
+S_t = S_o e^{(\mu-\frac{1}{2}\sigma^2)dt + \sigma dW}
+$$
+
+Para un año:
+
+$$ S_\text{1año} = 10 e^{(0.25-\frac{1}{2}(0.15)^2(1) + 0.15 ~\epsilon \sqrt{1}} $$
+
+Entonces :
+
+```{r}
+So <- 10
+mu <- 0.25
+sigma <- 0.15
+dt <- 1 / 252
+t <- seq(0,1,length.out=253)
+
+```
+
+-   Gráficar una simulación de la evolución del precio, desde su valor inicial hasta un año.
+
+    ```{r}
+    w <- c(0,cumsum(sqrt(dt)*rnorm(252)))
+    St <- So*exp((mu-0.5*sigma^2)*t+sigma*w)
+    plot(St,type = "l",main = "Simulación del precio 1 año", col = "salmon")
+    ```
+
+    ```{r}
+    tail(St)
+    ```
+
+    Repetir la misma simulación un montón de veces
+
+    ```{r}
+    sim <-  100000
+    p_final <- numeric(sim)
+    for (i in 1:sim) {
+      W <- c(0,cumsum(sqrt(dt)*rnorm(252)))
+      St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+      p_final[i]=St[253]
+    }
+    ```
+
+    ```{r}
+    hist(p_final , n=100, col = "salmon")
+    mean(p_final)
+
+    ```
+
+-   Probabilidad de que el precio supere 12 pesos en un año.
+
+-   Probabilidad de que el precio se ubique entre 11 y 13 pesos en un año.
+
+    ```{r}
+
+    ```
+
+-   Un intervalo de confianza para el precio al 95% en un año.
+
+    ```{r}
+
+    ```
+
+-   Precio Esperado en un año.
+
+    ```{r}
+
+    ```
