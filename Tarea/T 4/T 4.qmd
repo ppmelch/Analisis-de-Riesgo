@@ -40,6 +40,31 @@ rendimiento <- diff(log(BIMBO$`BIMBOA.MX.Adjusted`))
 rendimiento <- na.omit(rendimiento)
 ```
 
+## Gráficos Precios y Rendimientos
+
+### Precios
+
+```{r}
+plot(precio_ajustado,xlab = "Date", ylab= "Prices", col = "salmon", main = "Gráfico Precios")
+```
+
+### Rendimientos
+
+```{r}
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma") , col= "salmon", n=100)
+
+```
+
+```{r}
+
+plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimientos", col = "salmon", type= "l")
+
+```
+
+------------------------------------------------------------------------
+
+## 1)
+
 ## Parámetros
 
 ```{r}
@@ -52,6 +77,7 @@ T <- 5 / 252
 dt <- T / (T*252)
 t <- seq(0, T, length.out =(T * 252 + 1))
 
+So
 mu
 sigma
 ```
@@ -87,30 +113,152 @@ for (i in 1:sim) {
 ```
 
 ```{r}
-mean(p_final < So)
+mean(p_final < 0)
 ```
 
 ## Cálculo Teórico
 
-----
+### Para $S_t$
 
-## Gráficos Precios y Rendimientos
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
 
-### Precios
+$S_o = 54.3$ $\mu= -0.3586432$ $\sigma = 0.3095557$
+
+$$ln(S_t) = ln(54.3)+(-0.3586432-\frac{1}{2}*(0.309555)^2)~ \frac{5}{252} + 0.309555~\epsilon\sqrt{\frac{5}{252}} $$
+
+$$3.9864 + 0.0435~\epsilon$$
+
+$$E[ln(S_t)]=3.9864$$
+
+$$V[ln(S_t)]=0.0019$$
+
+$$P(S_t<S_0)=0.5739$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$ Con los parámetros:
+
+$S_o = 54.3$, $\mu= -0.3586432$ ,$\sigma = 0.3095557$
+
+$$ds  = (54.3)(-0.3586432)(\frac{5}{252}) + (54.3)(0.3095557)\epsilon \sqrt{\frac{5}{252}}$$
+
+$$-0.3863+2.3672\epsilon$$
+
+$$E[ds]=-0.3863$$ $$V[ds]=5.6039$$
+
+$$P(ds<0)=0.5648$$
+
+### Comparación de resultados obtenidos
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.56941 | 0.56398 |
+| **Teórico** | 0.5739 | 0.5648 |
+
+------------------------------------------------------------------------
+
+## 2) Para un año
+
+## Parámetros
 
 ```{r}
-plot(precio_ajustado,xlab = "Date", ylab= "Prices", col = "salmon", main = "Gráfico Precios")
+So <-  as.numeric(last(Cl(BIMBO)))
+mu <- mean(rendimiento)*252
+sigma <- sd(rendimiento) * sqrt(252)
+
+
+T <- 252 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+So
+mu
+sigma
 ```
 
-### Rendimientos
+## Cálculo Empírico
+
+### Simulación St
 
 ```{r}
-hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma") , col= "salmon", n=100)
-
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
 ```
 
 ```{r}
-
-plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimientos", col = "salmon", type= "l")
-
+mean(p_final< So)
 ```
+
+### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final < 0)
+```
+
+## Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 54.3$ $\mu= -0.3586432$ $\sigma = 0.3095557$
+
+$$ln(S_t) = ln(54.3)+(-0.3586-\frac{1}{2}*(0.3095)^2)~ \frac{252}{252} + 0.3095~\epsilon\sqrt{\frac{252}{252}} $$
+
+$$3.5880 + 0.3095~\epsilon$$
+
+$$E[ln(S_t)]=3.5880$$
+
+$$V[ln(S_t)]=0.0958$$
+
+$$P(S_t<S_0)=0.9055$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$ Con los parámetros:
+
+$S_o = 54.3$, $\mu= -0.3586432$ ,$\sigma = 0.3095557$
+
+$$ds  = (54.3)(-0.3586432)(\frac{252}{252}) + (54.3)(0.3095557)\epsilon \sqrt{\frac{252}{252}}$$
+
+$$-19.47198+16.80585\epsilon$$
+
+$$E[ds]=-19.47198$$ $$V[ds]=282.4366$$
+
+$$P(ds<0)=0.8767$$
+
+### Comparación de resultados obtenidos
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.90706 | 0.87598 |
+| **Teórico** | 0.9055 | 0.8767 |
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
