@@ -1,0 +1,116 @@
+---
+title: "T 4"
+format: html
+editor: visual
+---
+
+# HW 6: Estimación de probabilidades
+
+## Libraries
+
+```{r}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+library(moments)
+library(zoo)
+```
+
+## Data Import
+
+```{r}
+BIMBO <- getSymbols("BIMBOA.MX",
+                    src = "yahoo",
+                    auto.assign = FALSE)
+
+first_date <- as.Date("2024-02-01")
+final_date <- as.Date("2025-02-01")
+
+# Filtrar rango completo antes de extraer el Ajustado
+BIMBO <- BIMBO[index(BIMBO) >= first_date & index(BIMBO) <= final_date]
+
+# Columna de precios ajustados solo en ese rango
+precio_ajustado <- Ad(BIMBO)
+```
+
+## Rendimientos
+
+```{r}
+rendimiento <- diff(log(BIMBO$`BIMBOA.MX.Adjusted`))
+rendimiento <- na.omit(rendimiento)
+```
+
+## Parámetros
+
+```{r}
+So <-  as.numeric(last(Cl(BIMBO)))
+mu <- mean(rendimiento)*252
+sigma <- sd(rendimiento) * sqrt(252)
+
+
+T <- 5 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+mu
+sigma
+```
+
+## Cálculo Empírico
+
+### Simulación St
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final< So)
+```
+
+### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final < So)
+```
+
+## Cálculo Teórico
+
+----
+
+## Gráficos Precios y Rendimientos
+
+### Precios
+
+```{r}
+plot(precio_ajustado,xlab = "Date", ylab= "Prices", col = "salmon", main = "Gráfico Precios")
+```
+
+### Rendimientos
+
+```{r}
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma") , col= "salmon", n=100)
+
+```
+
+```{r}
+
+plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimientos", col = "salmon", type= "l")
+
+```

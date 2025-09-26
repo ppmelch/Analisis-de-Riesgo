@@ -1,0 +1,243 @@
+---
+title: "C 10"
+format: html
+editor: visual
+
+date: "2025-09-26"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged
+---
+
+# Modelo CAPM (Capital Asset Price Model)
+
+# Modelos de Valoración de Activos de Capital
+
+Propuesto por Sharpe (1964), establece que el rendimiento de un activo o un portafolio es igual a la tasa libre de riesgo, más un precio por el riesgo que tiene ese instrumento medido por el “coeficiente beta”.
+
+Este modelo permite relacionar el concepto de riesgo con el rendimiento de un activo específico.
+
+El model CAPM describe la relación riesgo-rendimiento , es conocido como la línea de mercado de valores e implica que , en equilibrio de mercado , los precios de los valores serán tales que exista una correlación lineal entre la tasa de rendimiento requerida y el riesgo sistemático.
+
+Teniendo en cuenta que el CAPM es una frontera de posibilidades de inversión eficiente , permite considerar opciones de inversión con alto y bajo riesgo hasta llegar a activos libres de riesgo.
+
+Por lo tanto, es utilizado con el objetivo de analizar e identificar estrategias de inversión por medio de la creación de portafolios óptimos estudiando la relación riesgo-rendimiento.
+
+El Modelo CAPM se basa en los trabajos de Markowitz (1952) , quien trató el problema de seleccionar un portafolio como un problema de maximización de utilidad bajo incertidumbre.
+
+Escoger un portafolio optimo se basa en dos párametros de la distribución de los retornos y media y varianza (o desviación estándar)
+
+Con este fundamento , el CAPM se apoya en algunos supuestos , los cuales permiten establecer una relación entre rendimiento y riesgo.
+
+**Supuestos CAPM:**
+
+• Se asume que los inversionistas solo consideran un periodo de tiempo, lo que causa que el modelo sea estático y no dinámico.\
+• No tiene en cuenta el riesgo no sistemático, por lo que se piensa que el rendimiento solo depende del riesgo sistemático.\
+• Los rendimientos se distribuyen normalmente, por lo que se puede decir que la Beta es una medida de riesgo.\
+• El mercado es perfectamente eficiente, donde todos los inversionistas poseen la misma información.\
+• Todos los activos son perfectamente divisibles y líquidos.\
+• No existen costos de transacción ni impuestos\
+• Todos los inversionistas son precio-aceptantes y pueden obtener y otorgar precios a una tasa libre de riesgo.\
+• Los inversores toman decisiones dependiendo de sus preferencias al riesgo\
+
+El modelo CAPM básico establece que el rendimiento esperado de un activo está dado por :
+
+***Eq. 1***
+
+$$
+E[R_j] = R_f + \lambda \frac{Cov[R_j,R_m]}{\sigma_{RM}}
+$$
+
+Donde:
+
+$E[R_j]:$ Rendimiento esperado de un activo j
+
+$R_f:$: Tasa de rendimiento libre de riesgo , normalmente indicada por el rendimiento obtenido sobre un bono de tesorería.
+
+$R_m:$ Rendimiento del portafolio de mercado , usualmente un índice de mercado.
+
+$\lambda:$ Es la prima de riesgo de mercado por unidad de riiesgo. Se calcula como:
+
+***Eq. 2***
+
+$$\lambda = \frac{E[R_m]-R_f}{\sigma_{RM}}$$
+
+Sustituyendo la ecuación 2 en 1 tenemos que :
+
+***Eq. 3***
+
+$$
+E[R_j] = R_f + \beta (E[R_M]-R_f)
+$$
+
+Donde:
+
+***Eq. 3.1***
+
+$$
+\beta = \frac{Cov[R_j,R_m]}{\sigma^2_{RM}}
+$$
+
+Esta ecuación nos muestra que el retorno esperado de un activo depende la tasa libre de riesgo y un retorno extra por el riesgo asumido.
+
+Este retorno extra depende de $\beta$, el cual es una medida de riesgo del activo en función de la variación de sus retornos y la variación de los retornos del mercado. Además de la diferencia entre el retorno esperado del mercado y la tasa libre de riesgo.
+
+A la diferencia de $E[R_M]-R_f$ se conoce como prima de riesgo de mercado.
+
+$$
+E[R_j] = R_f + \beta (E[R_M]-R_f)
+$$
+
+El coeficiente $\beta$ representa una medida del riesgo sistemático de un activo.
+
+Su valor nos indica la variación del activo en relación con la variación observada en el mercado.
+
+$\beta > 1 :$ La variación de la acción es mayor que la del mercado , considerándose un activo que es agresivo. Ganamos más cuando la economía crece , pero también perdemos más cuando la economía decrece.
+
+$\beta < 1 :$ La variación de la acción es menor que la del mercado , considerándose un activo que es defensivo.
+
+$\beta = 1 :$ La variación de la acción es igual que la del mercado.
+
+La ecuación 3) se puede escribir como una regresión lineal:
+
+***Eq. 4***
+
+$$
+R_{jt} - R_{ft} = \alpha + \beta (E[R_{Mt}-R_{ft}]+u_t
+$$
+
+En esta regresión lineal $u_t$ representa las variaciones en el ajuste de la regresión.
+
+En esta nueva versión se puede observar que $\beta$ representa la pendiente de la recta de mejor ajuste entre el rendimiento excedente del mercado con relación a la tasa de libre riesgo ($R_{jt}-R_{ft})$ y el rendimiento excedente del activo con relación a la tasa libre de riesgo $(R_{Mt}-R_{ft})$.
+
+El estimar esta regresión obtendremos la linea característica de la acción. La pendiente de la regresión representa una medida de la sensibilidad de los rendimientos de un activo ante cambios en los rendimientos del mercado.
+
+Para el activo j se espera que un rendimiento de mercado de 1% por encima de la tasa libre de riesgo , se vea acompañado en promedio de un retorno positivo e igual a $\beta$ veces el rendimiento del mercado.
+
+El valor coeficiente de determinación $R^2$ nos indica que el porcentaje de las variaciones en el rendimiento del activo son consecuencia de las variaciones en el rendimiento del mercado , por lo tanto , el valor de $R^2$ representa el porcentaje del riesgo sistemático presente el activo.
+
+Para encontrar los parámetros de la ecuación 4 (regresión lineal) estimamos la regresión en la cual:
+
+-   La variable dependiente es el rendimiento excedente del activo en relación a la tasa de interés.
+
+-   La variable independiente es el rendimiento excedente del mercado con relación a la tasa de interés.
+
+El parámetro \beta está asociado de manera específica al activo j , tenemos entonces:
+
+***Eq. 5***
+
+$$
+R^2_{j} = \alpha + \beta_j R^e_{M} + u_t
+$$
+
+Donde :
+
+\$ R\^e\_{j} = R\_{jt} - R\_{ft}\$ & $R^e_{M} = R_{Mt} - R_{ft}$
+
+$R^e_j = \alpha + \beta_j R^e_{M}+u_t$
+
+Recordemos que en una regresión lineal el error $u_t$ es todo aquello que explica el comportamiento de la variable dependiente que no es explicado por la independiente. Para ello considereramos que tanto rendimiento del activo como el del mercado con variables aleatorias.
+
+Si usamos la ecuación anterior para determinar la varianza del rendimiento del activo :
+
+$Var[R^e_j] = Var[\alpha + \beta_j R^e_M + u_t]$
+
+$Var[R^e_j] = Var[\beta_j R^e_M] + Var [u_t]$
+
+$Var[R^e_j] = \beta^2_j \sigma^2_M + \sigma^2_u$
+
+***Eq. 6***
+
+$\sigma^2_j = \beta^2_j \sigma^2_M + \sigma^2_u$
+
+La ecuación anterior no smuestra que la varianza del rendimiento del activo (el riesgo total del activo) está determindado por dos componentes:
+
+-   El primero $\beta^2_j \sigma^2_M$ corresponde al riesgo proveniente del mercado. (Riesgo Sistemático)
+
+-   El segundo es $\sigma^2_u$ es el riesgo que no se relaciona con el mercado (Riesgo no Sistemático)
+
+$$1= \rho(R^e_j,R^2_M)^2 + \frac{\sigma^2_u}{\sigma^2_j}$$
+
+El Coeficiente de correlación entre los excesos de rendimientos del activo y del mercado eleavado al cuadrado, corresponde con el coefieciente de determinación $R^2$ que se obtiene de una regresión lineal.
+
+Se puede reescribir como :
+
+***Eq. 7***
+
+$$\sigma^2_j = \frac{\sigma^2_u}{1-R^2}$$ Esta expresión (riesgo total) nos dice que
+
+Es decir, el riesgo al que se encuentra sujeto el activo j es igual a la varianza de los errores de la regresión lineal $\sigma^2_u$ (error estándar al cuadrado), dividido entre uno menos el coeficiente de determinación de la misma regresión.
+
+Cuando efectuamos la regresión lineal $R^2$ representa el porcentaje de las variaciones que tiene $R^e_j$ (rendimiento del activo) que son ocasionadas por $R^e_M$ (rendimiento del mercado). Es decir, representa el porcentaje de riesgo sistemático que tiene el activo.
+
+El porcentaje de riesgo no sistemático que tiene el activo será 1 − $R^2$
+
+Ambos en relación con el riesgo total. $\sigma^2_u$ representa el riesgo no sistemático del activo. Para obtener el riesgo total usamos la ecuación 7. Finalmente, el riesgo sistemático, será igual a la diferencia entre el riesgo total y el riesgo no sistemático.
+
+------------------------------------------------------------------------
+
+## Aplicando en R
+
+### Librerías
+
+```{r}
+library(quantmod)
+library(readxl) 
+```
+
+Explicar un poco que el modelo CAPM
+
+$$
+R_j - R_f = \alpha +\beta (R_m-R_f)+u 
+$$
+
+Necesitamos 3 cosas
+
+1\) Rendimiento de un activo (j)
+
+2\) Rendimiento del mercado IPC (m)
+
+3\) Rendimiento del cete (f)
+
+```{r echo=FALSE}
+#| message: false
+#| warning: false
+clave <- "GFNORTEO.MX"
+datos <- new.env()
+getSymbols(clave, from="2020-09-25", env=datos)
+
+
+# Portafolio con 100  accciones de GFNORTEO.MX
+precio_j <- 100*datos[[clave]][,6]
+```
+
+Para el IPC
+
+```{r}
+getSymbols("^MXX", from="2020-09-25", env=datos)
+precio_m <- datos[["MXX"]][,6]
+```
+
+Para la tasa libre de riesgo
+
+```{r}
+r_f <- read_xlsx(("tasa_cete.xlsx"))
+```
+
+Vamos a llevartodo a terminos mensuales
+
+```{r}
+precio_j <- to.monthly(precio_j)[,4]
+```
+
+```{r}
+precio_m <- to.monthly(precio_m)[,4]
+```
+
+```{r}
+r_j <- monthlyReturn(precio_j)
+r_m <- monthlyReturn(precio_m)
+```

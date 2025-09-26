@@ -122,6 +122,8 @@ t <- seq(0,1,length.out=253)
     }
     ```
 
+    -   Precio Esperado en un año.
+
     ```{r}
     hist(p_final , n=100, col = "salmon")
     mean(p_final)
@@ -130,20 +132,47 @@ t <- seq(0,1,length.out=253)
 
 -   Probabilidad de que el precio supere 12 pesos en un año.
 
+    ```{r}
+    mean(p_final>12)
+
+    ```
+
 -   Probabilidad de que el precio se ubique entre 11 y 13 pesos en un año.
 
     ```{r}
+    mean(11<p_final & 13>p_final)
+    mean(p_final<13)-mean(p_final<11)
 
     ```
 
 -   Un intervalo de confianza para el precio al 95% en un año.
 
     ```{r}
-
+    quantile(p_final, 0.025)
+    quantile(p_final, 0.975)
     ```
 
--   Precio Esperado en un año.
+-   
+
+    ```{r}
+    mean(9.472295 <p_final & 17.06231 >p_final)
+    ```
+
+-   Probabilidad de que el precio aumente
+
+    ```{r}
+    mean(p_final > So)
+    ```
+
+-   Probabilidad de que el precio disminuya
 
     ```{r}
 
+    mean(p_final < So)
+    ```
+
+-   Probabilidad de que el precio incremente un 30% de su valor inicial
+
+    ```{r}
+    mean(p_final > (So*1.3))
     ```

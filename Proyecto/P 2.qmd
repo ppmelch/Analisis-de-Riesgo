@@ -1,0 +1,64 @@
+---
+title: "P 2"
+format: html
+editor: visual
+---
+
+## Librerías
+
+```{r}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+library(tidyverse)
+library(moments)
+```
+
+## Importación de Datos
+
+```{r}
+
+Inbursa <- getSymbols("GFINBURO.MX",
+                      src = "yahoo",
+                      auto.assign = FALSE)  
+
+first_date <- index(Inbursa)[1]
+final_date <- as.Date("2023-01-01")
+
+Inbursa <- Inbursa[index(Inbursa) <= final_date]
+
+
+precio_ajustado <- Ad(Inbursa)
+
+
+```
+
+### Gráfico Precios
+
+```{r}
+plot(index(precio_ajustado),
+     as.numeric(precio_ajustado),
+     type = "l",                        
+     col  = "salmon",
+     main = "Precio Ajustado GFINBURO.MX",
+     xlab = "Fecha",
+     ylab = "Precio (MXN)")
+```
+
+### Gráfico Rendimientos
+
+```{r}
+
+rendimiento <- diff(log(Inbursa$'GFINBURO.MX.Adjusted'))
+rendimiento <- na.omit(rendimiento)
+
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma Rendimientos") , col= "salmon", n=100)
+
+
+```
+
+```{r}
+plot(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Gráfico Rendimientos") , col= "salmon", n=100)
+
+```
