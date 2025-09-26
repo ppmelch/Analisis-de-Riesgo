@@ -2,14 +2,14 @@
 title: "C 10"
 format: html
 editor: visual
-
 date: "2025-09-26"
-output: 
+author: "José Armando Melchor Soto"
+output:
   html_document:
-    code_folding: hide   
-    toc: true           
+    code_folding: hide
+    toc: true
     toc_float: true
-    df_print: paged
+    df_print: paged
 ---
 
 # Modelo CAPM (Capital Asset Price Model)
