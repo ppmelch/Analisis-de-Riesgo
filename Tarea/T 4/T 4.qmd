@@ -63,7 +63,7 @@ plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimien
 
 ------------------------------------------------------------------------
 
-## 1)
+## 1) Para 5 días
 
 ## Parámetros
 
@@ -261,4 +261,274 @@ $$P(ds<0)=0.8767$$
 
 ------------------------------------------------------------------------
 
+## 3) Análisis de los Resultados
+
+5 días
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.56941 | 0.56398 |
+| **Teórico** | 0.5739 | 0.5648 |
+
+1 Año
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.90706 | 0.87598 |
+| **Teórico** | 0.9055 | 0.8767 |
+
 ------------------------------------------------------------------------
+
+## 4) P (So \> 18)
+
+## Parámetros
+
+```{r}
+So <-  15
+mu <- 0.15
+sigma <- 0.65
+```
+
+## Para 1 Año
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+
+T <- 252 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{252}{252} + 0.65~\epsilon\sqrt{\frac{252}{252}} $$
+
+$$2.6468 + 0.65~\epsilon$$
+
+$$P(S_t>18)=0.3539$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{252}{252}) + (15)(0.65)\epsilon \sqrt{\frac{252}{252}}$$
+
+$$2.25+9.75~\epsilon$$
+
+$$P(ds>3)=0.4693$$
+
+## Para 6 meses
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+T <- (252/2) / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{1}{2} + 0.65~\epsilon\sqrt{\frac{1}{2}} $$
+
+$$2.6774 + 0.4596~\epsilon$$
+
+$$P(S_t>18)=0.3215$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{1}{2}) + (15)(0.65)\epsilon \sqrt{\frac{1}{2}}$$
+
+$$1.125+6.8943~\epsilon$$
+
+$$P(ds>3)=0.4693$$
+
+## Para 1 mes
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+T <-  (252/12) / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{1}{12} + 0.65~\epsilon\sqrt{\frac{1}{12}} $$
+
+$$2.7029 + 0.1876~\epsilon$$
+
+$$P(S_t>18)=0.1588$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{1}{12}) + (15)(0.65)\epsilon \sqrt{\frac{1}{12}}$$
+
+$$0.1875+2.8146~\epsilon$$
+
+$$P(ds>3)=0.1588$$
+
+## Resultados
+
+***1 año***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.35311 | 0.47257 |
+| **Teórico** | 0.3539 | 0.4693 |
+
+***6 meses***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.32341 | 0.3922 |
+| **Teórico** | 0.3215 | 0.4693 |
+
+***1 mes***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.15904 | 0.16152 |
+| **Teórico** | 0.1588 | 0.1588 |
+
+------------------------------------------------------------------------
+
+## 5) Modificación de Código
