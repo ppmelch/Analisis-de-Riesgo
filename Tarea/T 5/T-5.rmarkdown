@@ -46,19 +46,10 @@ rendimiento <- na.omit(rendimiento)
 
 ```{r}
 plot(precio_ajustado,xlab = "Date", ylab= "Prices", col = "salmon", main = "Gráfico Precios")
-```
 
-### Rendimientos
-
-```{r}
-hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma") , col= "salmon", n=100)
-
-```
-
-```{r}
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma Rendimientos") , col= "salmon", n=100)
 
 plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimientos", col = "salmon", type= "l")
-
 ```
 
 ------------------------------------------------------------------------
@@ -151,7 +142,7 @@ $$P(ds<0)=0.5648$$
 ### Comparación de resultados obtenidos
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -159,6 +150,8 @@ $$P(ds<0)=0.5648$$
                                                                     $$ |
 | **Empírico** | 0.56941 | 0.56398 |
 | **Teórico** | 0.5739 | 0.5648 |
+
+Los resultados, tanto del cálculo empírico como del teórico de $Ln⁡(St)$ y $ds$, son muy similares. Desde mi perspectiva, las pequeñas diferencias observadas pueden deberse al número de decimales considerados en cada simulación.
 
 ------------------------------------------------------------------------
 
@@ -250,7 +243,7 @@ $$P(ds<0)=0.8767$$
 ### Comparación de resultados obtenidos
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -266,7 +259,7 @@ $$P(ds<0)=0.8767$$
 5 días
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -278,7 +271,7 @@ $$P(ds<0)=0.8767$$
 1 Año
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -286,6 +279,8 @@ $$P(ds<0)=0.8767$$
                                                                     $$ |
 | **Empírico** | 0.90706 | 0.87598 |
 | **Teórico** | 0.9055 | 0.8767 |
+
+Con base en la conclusión anterior, se observa nuevamente que los resultados son muy similares. Sin embargo, el cálculo de $Ln(S_t)$ parece ofrecer mejores estimaciones cuando se considera un horizonte de un año, mientras que $ds$ resulta más adecuada para periodos menores a un mes, como lo pueden ser los 5 días calculados anteriormente.
 
 ------------------------------------------------------------------------
 
@@ -496,7 +491,7 @@ $$P(ds>3)=0.1588$$
 ***1 año***
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -508,7 +503,7 @@ $$P(ds>3)=0.1588$$
 ***6 meses***
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -520,7 +515,7 @@ $$P(ds>3)=0.1588$$
 ***1 mes***
 
 |  |  |  |
-|------------------|-------------------------|-----------------------------|
+|----|----|----|
 | **Cálculo** | $$                      
                                 Ln(S_t)  
                                 $$ | $$                           
@@ -532,3 +527,89 @@ $$P(ds>3)=0.1588$$
 ------------------------------------------------------------------------
 
 ## 5) Modificación de Código
+
+## Parámetros
+
+### Para $S_t$
+
+```{r}
+So    <- 15
+mu    <- 0.15
+sigma <- 0.65
+sim   <- 1000
+
+```
+
+```{r}
+prob_st <- numeric(240)
+for (mes in 1:240) {
+  T      <- mes / 12
+  n_days <- round(T * 252)
+  dt     <- T / n_days
+  t  <- seq(0, T, length.out = n_days + 1)
+  
+  p_final <- numeric(sim)
+  for (i in 1:sim) {
+    W  <- c(0, cumsum(sqrt(dt) * rnorm(n_days)))
+    St <- So * exp((mu - 0.5 * sigma^2) * t + sigma * W)
+    p_final[i] <- St[n_days + 1]
+  }
+  prob_st[mes] <- mean(p_final > 18)
+}
+```
+
+```{r}
+plot(1:240, prob_st, type = "l",xlab = "Mes", ylab = "Probabilidad", main = "Probabilidad de que precio sea mayor a 18 en 20 años" , col = "skyblue",lwd=2)
+grid()
+```
+
+### Para $ds$
+
+```{r}
+prob_ds <- numeric(240)
+for (mes in 1:240) {
+  T      <- mes / 12                 
+  n_days <- round(T * 252)           
+  dt     <- T / n_days
+  t_vec  <- seq(0, T, length.out = n_days + 1)
+  
+  p_final <- numeric(sim)
+  for (i in 1:sim) {
+    W  <- c(0, cumsum(sqrt(dt) * rnorm(n_days)))
+    ds <- So * mu * t_vec + So * sigma * W
+    p_final[i] <- ds[n_days + 1]     
+  }
+  prob_ds[mes] <- mean(p_final > 3)
+}
+
+```
+
+```{r}
+plot(1:240, prob_ds, type = "l",
+     xlab = "Mes",
+     ylab = "Probabilidad",
+     main = "Probabilidad de que precio sea mayor a 3 en 20 años", col = "salmon",lwd= 2)
+
+```
+
+### Comparación de Gráficas
+
+```{r}
+
+meses  <- 1:240
+colors <- c("salmon", "skyblue")   
+
+plot(meses, prob_ds, type = "l", col  = colors[1],lwd  = 2, main = "Comparación ecuaciones ds y ln(St)", xlab = "Meses",ylab = "Probabilidad")
+
+lines(meses, prob_st, col  = colors[2],lwd  = 2)
+
+legend("right",legend = c("ds", "ln(St)"), col    = colors, lty    = 1, lwd    = 2, bty    = "n")
+
+grid()
+
+```
+
+Basandonos en las conclusiones anteriores , las ecuaciones $Ln(S_t)$ y $ds$ muestran comportamientos distintos. La probabilidad de $ds$ crece de forma casi constante, superando 0.8 al cabo de 20 años, mientras que $Ln(S_t)$ alcanza un máximo cercano a 0.4 entre los meses 30 y 60 y luego desciende hasta alrededor de 0.3.
+
+Esta diferencia se debe a que $ds$ refleja variaciones de corto plazo y se recomienda para horizontes menores a un mes, mientras que $Ln(S_t)$ capta la evolución de largo plazo, ofreciendo una estimación más precisa para periodos extensos.
+

@@ -1,0 +1,622 @@
+---
+title: "T_5"
+format: html
+editor: visual
+date: "2025-09-29"
+author: "José Armando Melchor Soto"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    df_print: paged
+---
+
+# HW 6: Estimación de probabilidades
+
+## Libraries
+
+```{r}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+library(moments)
+library(zoo)
+```
+
+## Data Import
+
+```{r}
+BIMBO <- getSymbols("BIMBOA.MX",
+                    src = "yahoo",
+                    auto.assign = FALSE)
+
+first_date <- as.Date("2024-02-01")
+final_date <- as.Date("2025-02-01")
+
+# Filtrar rango completo antes de extraer el Ajustado
+BIMBO <- BIMBO[index(BIMBO) >= first_date & index(BIMBO) <= final_date]
+
+# Columna de precios ajustados solo en ese rango
+precio_ajustado <- Ad(BIMBO)
+```
+
+## Rendimientos
+
+```{r}
+rendimiento <- diff(log(BIMBO$`BIMBOA.MX.Adjusted`))
+rendimiento <- na.omit(rendimiento)
+```
+
+## Gráficos Precios y Rendimientos
+
+### Precios
+
+```{r}
+plot(precio_ajustado,xlab = "Date", ylab= "Prices", col = "salmon", main = "Gráfico Precios")
+
+hist(rendimiento, xlab = "Rangos de Rendimiento", ylab= "Frecuencia", main= paste("Histograma Rendimientos") , col= "salmon", n=100)
+
+plot(rendimiento , xlab= "Fecha", ylab= "Frecuencia", main = "Gráfico Rendimientos", col = "salmon", type= "l")
+```
+
+------------------------------------------------------------------------
+
+## 1) Para 5 días
+
+## Parámetros
+
+```{r}
+So <-  as.numeric(last(Cl(BIMBO)))
+mu <- mean(rendimiento)*252
+sigma <- sd(rendimiento) * sqrt(252)
+
+
+T <- 5 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+So
+mu
+sigma
+```
+
+## Cálculo Empírico
+
+### Simulación St
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final< So)
+```
+
+### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final < 0)
+```
+
+## Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 54.3$ $\mu= -0.3586432$ $\sigma = 0.3095557$
+
+$$ln(S_t) = ln(54.3)+(-0.3586432-\frac{1}{2}*(0.309555)^2)~ \frac{5}{252} + 0.309555~\epsilon\sqrt{\frac{5}{252}} $$
+
+$$3.9864 + 0.0435~\epsilon$$
+
+$$E[ln(S_t)]=3.9864$$
+
+$$V[ln(S_t)]=0.0019$$
+
+$$P(S_t<S_0)=0.5739$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$ Con los parámetros:
+
+$S_o = 54.3$, $\mu= -0.3586432$ ,$\sigma = 0.3095557$
+
+$$ds  = (54.3)(-0.3586432)(\frac{5}{252}) + (54.3)(0.3095557)\epsilon \sqrt{\frac{5}{252}}$$
+
+$$-0.3863+2.3672\epsilon$$
+
+$$E[ds]=-0.3863$$ $$V[ds]=5.6039$$
+
+$$P(ds<0)=0.5648$$
+
+### Comparación de resultados obtenidos
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.56941 | 0.56398 |
+| **Teórico** | 0.5739 | 0.5648 |
+
+Los resultados, tanto del cálculo empírico como del teórico de $Ln⁡(St)$ y $ds$, son muy similares. Desde mi perspectiva, las pequeñas diferencias observadas pueden deberse al número de decimales considerados en cada simulación.
+
+------------------------------------------------------------------------
+
+## 2) Para un año
+
+## Parámetros
+
+```{r}
+So <-  as.numeric(last(Cl(BIMBO)))
+mu <- mean(rendimiento)*252
+sigma <- sd(rendimiento) * sqrt(252)
+
+
+T <- 252 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+So
+mu
+sigma
+```
+
+## Cálculo Empírico
+
+### Simulación St
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final< So)
+```
+
+### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+```
+
+```{r}
+mean(p_final < 0)
+```
+
+## Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 54.3$ $\mu= -0.3586432$ $\sigma = 0.3095557$
+
+$$ln(S_t) = ln(54.3)+(-0.3586-\frac{1}{2}*(0.3095)^2)~ \frac{252}{252} + 0.3095~\epsilon\sqrt{\frac{252}{252}} $$
+
+$$3.5880 + 0.3095~\epsilon$$
+
+$$E[ln(S_t)]=3.5880$$
+
+$$V[ln(S_t)]=0.0958$$
+
+$$P(S_t<S_0)=0.9055$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$ Con los parámetros:
+
+$S_o = 54.3$, $\mu= -0.3586432$ ,$\sigma = 0.3095557$
+
+$$ds  = (54.3)(-0.3586432)(\frac{252}{252}) + (54.3)(0.3095557)\epsilon \sqrt{\frac{252}{252}}$$
+
+$$-19.47198+16.80585\epsilon$$
+
+$$E[ds]=-19.47198$$ $$V[ds]=282.4366$$
+
+$$P(ds<0)=0.8767$$
+
+### Comparación de resultados obtenidos
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.90706 | 0.87598 |
+| **Teórico** | 0.9055 | 0.8767 |
+
+------------------------------------------------------------------------
+
+## 3) Análisis de los Resultados
+
+5 días
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.56941 | 0.56398 |
+| **Teórico** | 0.5739 | 0.5648 |
+
+1 Año
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.90706 | 0.87598 |
+| **Teórico** | 0.9055 | 0.8767 |
+
+Con base en la conclusión anterior, se observa nuevamente que los resultados son muy similares. Sin embargo, el cálculo de $Ln(S_t)$ parece ofrecer mejores estimaciones cuando se considera un horizonte de un año, mientras que $ds$ resulta más adecuada para periodos menores a un mes, como lo pueden ser los 5 días calculados anteriormente.
+
+------------------------------------------------------------------------
+
+## 4) P (So \> 18)
+
+## Parámetros
+
+```{r}
+So <-  15
+mu <- 0.15
+sigma <- 0.65
+```
+
+## Para 1 Año
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+
+T <- 252 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{252}{252} + 0.65~\epsilon\sqrt{\frac{252}{252}} $$
+
+$$2.6468 + 0.65~\epsilon$$
+
+$$P(S_t>18)=0.3539$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{252}{252}) + (15)(0.65)\epsilon \sqrt{\frac{252}{252}}$$
+
+$$2.25+9.75~\epsilon$$
+
+$$P(ds>3)=0.4693$$
+
+## Para 6 meses
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+T <- (252/2) / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{1}{2} + 0.65~\epsilon\sqrt{\frac{1}{2}} $$
+
+$$2.6774 + 0.4596~\epsilon$$
+
+$$P(S_t>18)=0.3215$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{1}{2}) + (15)(0.65)\epsilon \sqrt{\frac{1}{2}}$$
+
+$$1.125+6.8943~\epsilon$$
+
+$$P(ds>3)=0.4693$$
+
+## Para 1 mes
+
+### Cálculo Empírico
+
+#### Simulación St
+
+```{r}
+T <-  (252/12) / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+  p_final[i]=St[(T*252+1)]
+}
+mean(p_final>18)
+
+```
+
+#### Simulación ds
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) {
+  W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+  ds <- So*mu*t+So*sigma*W
+  p_final[i]=ds[(T*252+1)]
+}
+
+mean(p_final>3)
+```
+
+### Cálculo Teórico
+
+### Para $S_t$
+
+$$ln(S_t)=ln(S_0)+(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW$$ Con los parámetros
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ln(S_t) = ln(15)+(0.15-\frac{1}{2}*(0.65)^2)~ \frac{1}{12} + 0.65~\epsilon\sqrt{\frac{1}{12}} $$
+
+$$2.7029 + 0.1876~\epsilon$$
+
+$$P(S_t>18)=0.1588$$
+
+### Para $ds$
+
+$$ds=S_o\mu dt + S_o\sigma dW$$
+
+Con los parámetros:
+
+$S_o = 15$ $\mu= 0.15$ $\sigma = 0.65$
+
+$$ds  = (15)(0.15)(\frac{1}{12}) + (15)(0.65)\epsilon \sqrt{\frac{1}{12}}$$
+
+$$0.1875+2.8146~\epsilon$$
+
+$$P(ds>3)=0.1588$$
+
+## Resultados
+
+***1 año***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.35311 | 0.47257 |
+| **Teórico** | 0.3539 | 0.4693 |
+
+***6 meses***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.32341 | 0.3922 |
+| **Teórico** | 0.3215 | 0.4693 |
+
+***1 mes***
+
+|  |  |  |
+|------------------|-------------------------|-----------------------------|
+| **Cálculo** | $$                      
+                                Ln(S_t)  
+                                $$ | $$                           
+                                                                    ds  
+                                                                    $$ |
+| **Empírico** | 0.15904 | 0.16152 |
+| **Teórico** | 0.1588 | 0.1588 |
+
+------------------------------------------------------------------------
+
+## 5) Modificación de Código
+
+## Parámetros
+
+### Para $S_t$
+
+```{r}
+So    <- 15
+mu    <- 0.15
+sigma <- 0.65
+sim   <- 1000
+
+```
+
+```{r}
+prob_st <- numeric(240)
+for (mes in 1:240) {
+  T      <- mes / 12
+  n_days <- round(T * 252)
+  dt     <- T / n_days
+  t  <- seq(0, T, length.out = n_days + 1)
+  
+  p_final <- numeric(sim)
+  for (i in 1:sim) {
+    W  <- c(0, cumsum(sqrt(dt) * rnorm(n_days)))
+    St <- So * exp((mu - 0.5 * sigma^2) * t + sigma * W)
+    p_final[i] <- St[n_days + 1]
+  }
+  prob_st[mes] <- mean(p_final > 18)
+}
+```
+
+```{r}
+plot(1:240, prob_st, type = "l",xlab = "Mes", ylab = "Probabilidad", main = "Probabilidad de que precio sea mayor a 18 en 20 años" , col = "skyblue",lwd=2)
+grid()
+```
+
+### Para $ds$
+
+```{r}
+prob_ds <- numeric(240)
+for (mes in 1:240) {
+  T      <- mes / 12                 
+  n_days <- round(T * 252)           
+  dt     <- T / n_days
+  t_vec  <- seq(0, T, length.out = n_days + 1)
+  
+  p_final <- numeric(sim)
+  for (i in 1:sim) {
+    W  <- c(0, cumsum(sqrt(dt) * rnorm(n_days)))
+    ds <- So * mu * t_vec + So * sigma * W
+    p_final[i] <- ds[n_days + 1]     
+  }
+  prob_ds[mes] <- mean(p_final > 3)
+}
+
+```
+
+```{r}
+plot(1:240, prob_ds, type = "l",
+     xlab = "Mes",
+     ylab = "Probabilidad",
+     main = "Probabilidad de que precio sea mayor a 3 en 20 años", col = "salmon",lwd= 2)
+
+```
+
+### Comparación de Gráficas
+
+```{r}
+
+meses  <- 1:240
+colors <- c("salmon", "skyblue")   
+
+plot(meses, prob_ds, type = "l", col  = colors[1],lwd  = 2, main = "Comparación ecuaciones ds y ln(St)", xlab = "Meses",ylab = "Probabilidad")
+
+lines(meses, prob_st, col  = colors[2],lwd  = 2)
+
+legend("right",legend = c("ds", "ln(St)"), col    = colors, lty    = 1, lwd    = 2, bty    = "n")
+
+grid()
+
+```
+
+Basandonos en las conclusiones anteriores , las ecuaciones $Ln(S_t)$ y $ds$ muestran comportamientos distintos. La probabilidad de $ds$ crece de forma casi constante, superando 0.8 al cabo de 20 años, mientras que $Ln(S_t)$ alcanza un máximo cercano a 0.4 entre los meses 30 y 60 y luego desciende hasta alrededor de 0.3.
+
+Esta diferencia se debe a que $ds$ refleja variaciones de corto plazo y se recomienda para horizontes menores a un mes, mientras que $Ln(S_t)$ capta la evolución de largo plazo, ofreciendo una estimación más precisa para periodos extensos.
