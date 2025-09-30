@@ -186,6 +186,7 @@ Ambos en relación con el riesgo total. $\sigma^2_u$ representa el riesgo no sis
 ```{r}
 library(quantmod)
 library(readxl) 
+library(lubridate)
 ```
 
 Explicar un poco que el modelo CAPM
@@ -227,7 +228,7 @@ Para la tasa libre de riesgo
 r_f <- read_xlsx(("tasa_cete.xlsx"))
 ```
 
-Vamos a llevartodo a terminos mensuales
+Vamos a llevar todo a terminos mensuales
 
 ```{r}
 precio_j <- to.monthly(precio_j)[,4]
@@ -241,3 +242,67 @@ precio_m <- to.monthly(precio_m)[,4]
 r_j <- monthlyReturn(precio_j)
 r_m <- monthlyReturn(precio_m)
 ```
+
+Acomodando la tasa de interés para que sea compatible con lo que tenemos del mercado y del portafolio (110 acciones del activo)
+
+```{r}
+r_f$SF43936 <-  r_f$SF43936 / 100 / 12
+```
+
+```{r}
+r_f <- as.xts(r_f$SF43936, order.by = r_f$Fecha)
+r_f <-  to.monthly(r_f)[,4]
+```
+
+```{r}
+
+r_f  <-  subset(r_f, date(r_f) >= "2020-09-01")
+
+```
+
+Calculando excedentes
+
+```{r}
+E_jf <- r_j - r_f
+E_mf <- r_m - r_f
+```
+
+Hacemos una regresión
+
+```{r}
+
+CAMP <- lm(E_jf~E_mf)
+Resultados <- summary(CAMP)
+```
+
+$R^2$
+
+```{r}
+Resultados$r.squared
+```
+
+El % de riesgo no sistemático es de
+
+```{r}
+1-Resultados$r.squared
+```
+
+El error total es la varianza de los errores entre 1 menor el R cuadrado
+
+```{r}
+(Resultados$sigma^2) / (1-Resultados$r.squared)*100
+```
+
+Es el riesgo total del portafolio
+
+```{r}
+0.5729461*0.4625
+```
+
+Es el riesgo que viene del sistema
+
+```{r}
+0.5729461*(1-0.4625)
+```
+
+Es el riesgo es el que no viene del sistema
