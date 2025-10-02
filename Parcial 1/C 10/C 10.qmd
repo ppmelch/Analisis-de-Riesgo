@@ -2,7 +2,7 @@
 title: "C 10"
 format: html
 editor: visual
-date: "2025-09-26"
+date: "2025-09-26 - 2025-09-29"
 author: "José Armando Melchor Soto"
 output:
   html_document:
@@ -209,10 +209,13 @@ Necesitamos 3 cosas
 clave <- "GFNORTEO.MX"
 datos <- new.env()
 getSymbols(clave, from="2020-09-25", env=datos)
-
+# BIMBO
+clave2 <- "BIMBOA.MX"
+datos2 <- new.env()
+getSymbols(clave2, from="2020-09-25", env=datos2)
 
 # Portafolio con 100  accciones de GFNORTEO.MX
-precio_j <- 100*datos[[clave]][,6]
+precio_j <- 100*datos[[clave]][,6]+ 100*datos2[[clave2]][,6]
 ```
 
 Para el IPC

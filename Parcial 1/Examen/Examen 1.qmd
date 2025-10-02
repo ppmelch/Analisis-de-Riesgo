@@ -1,0 +1,34 @@
+---
+title: "Examen 1"
+author: "José Armando Melchor Soto"
+date: "2025-09-03"
+format: 
+  html:
+    toc: true       
+    toc-location: left   
+    number-sections: true  
+
+editor: visual
+execute:
+  echo: false     
+  warning: false  
+  message: false  
+---
+
+# Examen : Parcial 1
+
+## Libraries
+
+```{r}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+library(moments)
+library(zoo)
+```
+
+## Data Import 
+
+```{r}
+
+```
