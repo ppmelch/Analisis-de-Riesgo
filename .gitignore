@@ -1,4 +1,42 @@
-.Rproj.user
+# Archivos de R
 .Rhistory
 .RData
 .Ruserdata
+.Rapp.history
+
+# Archivos de RStudio
+.Rproj.user/
+.Rproj.user/*
+*.Rproj
+
+# Archivos de salida
+*.utf8.md
+*.knit.md
+*.nb.html
+
+# Carpetas de caché de R
+.Rcheck/
+__pycache__/
+*.Rcheck/
+
+# Paquetes y dependencias instalados localmente
+/packrat/
+/renv/library/
+/renv/staging/
+
+# Archivos generados por R Markdown / Quarto
+*.html
+*.pdf
+*.docx
+*.odt
+*.rtf
+*.tex
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Datos temporales
+*.tmp
+*.log
+*.out
