@@ -1,0 +1,154 @@
+---
+title: "Homework_7"
+author: 
+  - "Sofia Hinojosa - 742594"
+  - "Julieta Madrigal - 744029"
+  - "Sharon Manzano - 748293"
+  - "Jose Armando Melchor - 745697"
+  - "Isabela Torres-Septien - 730667"
+  
+date: "2025-10-06"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged
+---
+
+# HW 7 : CAMP
+
+## Librerías
+
+```{r}
+library(quantmod)
+library(tibble)
+library(readxl)
+library(tibble)
+```
+
+Explicar un poco que es el modelo CAPM
+
+$$ R_j - R_f = \alpha+\beta(R_m-R_f)+\nu $$
+
+Necesitamos 3 cosas
+
+1\) Rendimiento de un activo (j)
+
+2\) Rendimiento del mercado IPC (m)
+
+3\) Rendimiento de cete (f)
+
+```{r}
+datos <- new.env()
+claves <- c("TM", "MSFT","AAPL", "GOOG")
+getSymbols(claves, from='2020-02-01', to='2025-10-03', env = datos)
+
+precio_j1 <- datos[[claves[1]]][,6]
+precio_j2 <- datos[[claves[2]]][,6]
+precio_j3 <- datos[[claves[3]]][,6]
+precio_j4 <- datos[[claves[4]]][,6]
+```
+
+Transformamos los precios semanales a mensuales y calculamos sus rendimientos individuales:
+
+```{r}
+precio_j1 <- to.monthly(precio_j1)[,4]
+precio_j2 <- to.monthly(precio_j2)[,4]
+precio_j3 <- to.monthly(precio_j3)[,4]
+precio_j4 <- to.monthly(precio_j4)[,4]
+
+r_j1 <- monthlyReturn(precio_j1)
+r_j2 <- monthlyReturn(precio_j2)
+r_j3 <- monthlyReturn(precio_j3)
+r_j4 <- monthlyReturn(precio_j4)
+```
+
+```{r}
+r_j <- (0.25)*r_j1 + (0.25)*r_j2 + (0.25)*r_j3 + (0.25)*r_j4
+```
+
+Descargar los datos del IPC:
+
+```{r}
+getSymbols('^MXX', from='2020-02-01', to='2025-10-03', env=datos)
+precio_m <- datos[['MXX']][,6]
+precio_m <- to.monthly(precio_m)[,4]
+r_m <- monthlyReturn(precio_m)
+```
+
+Tasa libre de riesgo
+
+```{r}
+r_f <- read_xlsx('Cetes.xlsx')
+r_f
+```
+
+```{r}
+# columna sea numérica
+r_f$SF43936 <- as.numeric(r_f$SF43936)
+
+# Convierte la tasa anual a tasa mensual
+r_f$SF43936 <- r_f$SF43936 / 100 / 12
+
+# Pasa a xts
+r_f <- as.xts(r_f$SF43936, order.by = r_f$Fecha)
+
+# Mensuales
+r_f <- to.monthly(r_f)[,4]
+
+```
+
+## Regresión
+
+Calculamos excedentes
+
+```{r}
+E_jf <- r_j - r_f
+E_mf <- r_m - r_f
+```
+
+Hagamos la regresión lineal
+
+```{r}
+CAPM <- lm(E_jf ~ E_mf)
+resultados <- summary(CAPM)
+resultados
+```
+
+```{r}
+R_s <- resultados$r.squared # Riesgo Sistemático
+R_ns = 1-resultados$r.squared # Riesgo No Sistemático
+R_t = (resultados$sigma^2)/(1-resultados$r.squared) # Riesgo total
+
+R_s
+R_ns
+R_t
+```
+
+```{r}
+resultados$coefficients
+
+```
+
+```{r}
+beta <- resultados$coefficients[2]
+alpha <- resultados$coefficients[1]
+```
+
+```{r}
+beta
+alpha
+```
+
+El coeficiente beta es 0.5501 y el coeficiente alpha es 0.01179.
+
+$$
+\alpha=0.0118, \; \beta=0.5501
+$$
+
+## Conclusión
+
+En esta tarea se analizaron cuatro activos, obteniéndose el rendimiento esperado de cada uno mediante una Regresión Lineal Simple. El modelo CAPM permitió evaluar los activos y las carteras, midiendo el riesgo y determinando el rendimiento esperado ajustado al mercado.
+
+En el análisis realizado, se calculó un alpha de 0.118, lo que indica que el activo presenta un rendimiento superior al esperado dado su nivel de riesgo de mercado. Por otro lado, el beta obtenido fue de 0.55, lo que refleja un riesgo relativamente bajo en comparación con el mercado. En conjunto, estos resultados sugieren que el activo tiene un comportamiento favorable, ofreciendo rendimientos por encima del mercado mientras mantiene un nivel de riesgo moderado.

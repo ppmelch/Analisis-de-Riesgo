@@ -25,10 +25,189 @@ library(dplyr)
 library(lubridate)
 library(moments)
 library(zoo)
+
+set.seed(123)
 ```
+
+## 1)
+
+```{r}
+So= 30
+mu = 0.15
+sigma = 0.45
+dt = 2
+```
+
+## Simulación
+
+### $Ln(S_t)$
+
+```{r}
+
+T <-  504/252 / 252       
+dt <- T / (T*252)
+t <- seq(0, T, length.out =(T * 252 + 1))
+```
+
+```{r}
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) 
+  {W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+ St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+ p_final[i]=St[(T*252+1)]}
+
+mean(p_final > 40 )
+mean(p_final > 0)
+mean(50<p_final &  p_final< 55)
+```
+
+```{r}
+E <- So*exp^(mu*T)
+```
+
+## 2)
+
+```{r}
+sim <- 100000 
+```
+
+### Activo 3
+
+```{r}
+So= 400
+mu = 0.3
+sigma = 0.25
+n = 100
+```
+
+```{r}
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) 
+  {W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+ St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+ p_final[i]=St[(T*252+1)]}
+
+port1 = mean(p_final > So )
+```
+
+### Activo 2
+
+```{r}
+So= 300
+mu = 0.25
+sigma = 0.80
+n = 50
+```
+
+```{r}
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) 
+  {W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+ St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+ p_final[i]=St[(T*252+1)]}
+
+
+port2= mean(p_final > So )
+```
+
+### Activo 3
+
+```{r}
+So= 200
+mu = 0.75
+sigma = 0.80
+n= 70
+T = 252
+```
+
+```{r}
+
+sim <-  100000
+p_final <- numeric(sim)
+for (i in 1:sim) 
+  {W <- c(0,cumsum(sqrt(dt)*rnorm(T*252)))
+ St <- So*exp((mu-0.5*sigma^2)*t+sigma*W)
+ p_final[i]=St[(T*252+1)]}
+
+mean(p_final > 40 )
+mean(p_final > 0)
+mean(50<p_final &  p_final< 55)
+
+port3 = mean(p_final > So )}}
+
+```
+
+### Probabilidad de que incremente su valor actual en un año
+
+```{r}
+port1+port2+port3
+
+```
+
+```{r}
+portafolios = mean(p_final> 80 & p_final < 105)
+```
+
+## 4)
 
 ## Data Import
 
 ```{r}
+BIMBO <-  getSymbols("BIMBOA.MX", src = "yahoo", auto.assign = FALSE)
+first_date <- as.Date("2024-01-01")
+final_date <- as.Date("2024-12-31")
+
+BIMBO <- BIMBO[index(BIMBO) >= first_date & index(BIMBO) <= final_date]
+
+precio <- Ad(BIMBO)
+
+```
+
+### Rendimiento
+
+```{r}
+rend = diff(log(precio))
+rend = na.omit(rend)
+```
+
+### Volatilidad
+
+```{r}
+So = 55.35
+mu = mean(rend)*252*100
+sigma = sd(rend)*sqrt(252)*100
+
+print(mu)
+print(sigma)
+```
+
+## Simulación
+
+### $dS$
+
+```{r}
+
+T <-  10/254
+
+dt <-  T / (T*252)
+```
+
+```{r}
+sim <- 100000
+
+p_final <- numeric(sim)
+w <-  rnorm(sim)
+ds <- So*mu*T+So*sigma*w
+
+p_final = 
+
+mean(p_final>3)
+
+
 
 ```
