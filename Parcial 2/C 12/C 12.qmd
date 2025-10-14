@@ -1,0 +1,81 @@
+---
+title: "C 12"
+format: html
+editor: visual
+---
+
+## Promedio Móvil con Ponderaciones Exponenciales (EWMA)
+
+**Promedio Móvil**
+
+$$
+\sigma_{t,m}^2 = \frac{1}{m} \Sigma_{i=1}^m R_{t-i}^2
+$$
+
+**Desventajas**
+
+-   Ponderación es constante
+
+-   Para estimar una $\sigma_t^2$ yo necesito $\sigma_{t-1}^2$ , es decir , si hoy es t= 5 , no puedo construir una estimación para $\sigma_8^2$
+
+**Ventajas**
+
+-   Facilidad de cálculo
+
+-   Dinámico
+
+**Modelo EWMA**
+
+$$
+\sigma_t^2= (1-\lambda) \sum^\infty _{i=1} \lambda^{i-1}(R_{t-i})^2 
+$$
+
+Este modelo se conoce como el modelo Riskmetrics y fue desarrollado por JP Morgan en 1994.
+
+Si desarrollamos algunos de los términos de la ecuación anterior , tenemos que:
+
+$$
+\sigma_t^2 = (1-\lambda)[\lambda^0 R_{t-1}^2 + \lambda^1 R_{t-2}^2 + \lambda^2 R_{t-3}^2 + \lambda^3 R_{t-4}^2] 
+$$
+
+La ecuación anterior muestra que si definimos $\alpha_i = (1-\lambda)\lambda^{i-1}$ como las ponderaciones se dan a cada uno de los términos que representan el cuadrado de los rendimientos , estos disminuyen a través del tiempo a una tasa $\lambda$.
+
+Lo que implica que para el cálculo de la avrianza se da mayor importancia a las estimaciones más recientes y menor importancia a las estimaciones más antiguas.
+
+Desarrollando algunos elementos de esta ecuación, y observando su recursividad podemos concluir que la expresión puede simplificarse para llegar a una expresión de mayor simpleza como la siguiente:
+
+$$
+\sigma_t^2 = (1-\lambda)R_{t-1}^2+(1-\lambda) \lambda [\lambda^0 R_{t-2}^2 + \lambda^1 R_{t-3}^2 + \lambda^2 R_{t-4}^2 ] 
+$$
+
+$$\sigma_t^2 = (1-\lambda)R_{t-1}^2+\lambda\hat\sigma_{t-1}^2$$
+
+La última ecuación , corresponde al modelo EWMA para el cálculo de la varianza.
+
+Nos dice que la varianza para el dia t , será igual a un párametro $\lambda$ multiplicado por el cuadrado del rendimiento en el día $t-1$ más la multiplicación de la $1-\lambda$ y la estimación de la varianza en el día anterior.
+
+El valor de $\lambda$ es calculado por un proceso de optimización por medio de la máxima verosimilitud que se verá más adelante. Sin embargo, en 1994 J.P Morgan determinó que el valor de esta variable oscila entre valores de 0.94 y 0.97 dependiendo de la periodicidad de los datos que se usen.
+
+Observa que para determinar la varianza en el punto del tiempo $t$ , es necesario conocer la varianza en el punto del tiempo $t-1$ , así como el rendimiento en ese mismo punto del tiempo
+
+Considera que contamos con información de los últimos T rendimientos, $R_1 , R_2 , R_3 , ... , R_T$ y que conocemos el valor de $\sigma_T^2$. Si deseamos encontrar la varianza para el periodo $\sigma_{T+1}^2$ , podríamos emplear la formula descrita. Sin embargo , si es de nuestro interés obtener una estimación para $\sigma_{T+2}^2$ el modelo EWMA anticipa que:
+
+$\sigma_{T+2}^2 = (1-\lambda) R_{T+1}^2 + \lambda\sigma_{T+1}^2$
+
+**¿Cómo opera este modelo ?**
+
+Por ejemplo:
+
+SI la volatilidad para un cierto activo para el día 5 es de 1% por día y durante ese día se observó que la variabble tuvo un cambio de 2%. ¿ Cuál es la estimación de la volatilidad para el día 6? Considera que la varianza se estima con un modelo EWMA donde $\lambda = 0.94$
+
+$$
+\sigma_t^2 = (1-\lambda) R_{t-1}^2 + \lambda\hat{\sigma}_{t-1}^2
+$$
+
+$$
+(1-0.94)(0.02^2) + (0.94)(0.01^2) = 0.000118
+$$
+
+$$
+\sqrt{0.000118} = 0.01086= 1.086\text{%}
+$$

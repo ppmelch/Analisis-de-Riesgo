@@ -1,0 +1,67 @@
+---
+title: "C 12 - Máxima Verosimilitud"
+format: html
+editor: visual
+---
+
+## Máxima Verosimilitud
+
+Sea $X_1, X_2 ... X_n$ un conjunto de v.a , donde todas ellas se distribuyen $X_i \text~ N(\mu, \sigma^2)$ ( Nota: Misma media y misma varianza)
+
+Con ellas construimos la función de verosimilitud.
+
+$$
+L(\mu, \sigma^2) = f( x_1, \mu , \sigma^2) f( x_2, \mu , \sigma^2)... f( x_n, \mu , \sigma^2)
+$$
+
+Como cada $X_i$ tiene una distribución normal entonces:
+
+$$
+f( x_i, \mu , \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{1}{2} (\frac{x_i-\mu}{\sigma})^2}
+$$
+
+Entonces la Función de Verosimilitud
+
+$$
+L(\mu , \sigma^2) = \prod_{i=1} ^n  = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{1}{2} (\frac{x_i-\mu}{\sigma})^2}
+$$
+
+La técnica dice que para encontrar $\mu$ y $\sigma^2$ , lo que tengo que hacer es:
+
+$$
+Max_{\mu,\sigma^2} = L(\mu, \sigma^2)
+$$
+
+**Log-likely hood**
+
+$$
+L(\mu, \sigma^2) = \sum_{i=1}^n ln\sqrt{\frac{1}{2\pi\sigma^2}} + [-\frac{1}{2}(\frac{x_i-\mu}{\sigma})^2]
+$$
+
+$$
+L(\mu, \sigma^2) = \sum_{i=1}^n ln({\frac{1}{2\pi\sigma^2}})^\frac{1}{2} + [-\frac{1}{2}(\frac{x_i-\mu}{\sigma})^2]
+$$
+
+$$
+L(\mu, \sigma^2) = \sum_{i=1}^n \frac{1}{2}ln({\frac{1}{2\pi\sigma^2}}) + [-\frac{1}{2}(\frac{x_i-\mu}{\sigma})^2]
+$$
+
+$$
+L(\mu, \sigma^2) = \frac{n}{2}ln({\frac{1}{2\pi\sigma^2}}) -\sum_{i=1}^{n}\frac{1}{2}(\frac{x_i-\mu}{\sigma})^2
+$$
+
+$$
+L(\mu, \sigma^2) = -\frac{n}{2}ln({2\pi\sigma^2}) -\sum_{i=1}^{n}\frac{1}{2}(\frac{x_i-\mu}{\sigma^2})^2
+$$
+
+$$
+Max_{\sigma^2} ~~ L(\mu, \sigma^2) 
+$$
+
+Que después de derivar parcialmente , queda como :\
+
+$$\sigma^2= \frac{1}{n} \sum^{n}_{i=1}(x_i-\mu)^2$$
+Esto pasa cuando es constante
+
+
+

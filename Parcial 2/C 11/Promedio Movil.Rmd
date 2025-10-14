@@ -1,0 +1,106 @@
+---
+title: "Promedio Mobil"
+date: "2025-10-10"
+output: html_document
+---
+
+El precio se obtuvo hasta el 9 de octubre del 2025
+
+Estimacion de un modelo de varianza(Promedio Movil)
+
+```{r}
+library(quantmod)
+
+clave = "GFINBURO.MX"
+datos = new.env()
+getSymbols(clave, env = datos)
+precio = datos[[clave]][,6]
+rendimiento = na.omit(diff(log(precio)))
+r2 = rendimiento^2
+```
+
+```{r}
+plot(rendimiento)
+plot(r2)
+```
+
+```{r}
+library(TTR)
+vaR_5 = SMA(r2, n=5)
+VaR_10 = SMA(r2, n=10)
+Var_20 = SMA(r2, n=20)
+VaR_40 = SMA(r2, n=40)
+```
+
+Tenemos 4 modelos
+
+```{r}
+par(mfrow=c(2,2))
+plot(vaR_5, main = "PM 5 Días")
+plot(VaR_10, main = "PM 5 Días")
+plot(Var_20, main = "PM 5 Días")
+plot(VaR_40, main = "PM 5 Días")
+
+```
+
+Para seleccionar el mejor M, vamos a condiferar varios indicadores, el primero de ellos es la RMSE(Raíz media de los errores al cuadrado)
+
+```{r}
+rmse_loss  <- function(y, f) sqrt(mean((y - f)^2, na.rm = TRUE))
+Tn = NROW(r2)
+cut = floor(Tn*0.7)
+
+eval_pm <- function(r2, n, cut){
+  pm <- SMA(r2, n = n)               
+  # Pronóstico
+  fcast <- pm[cut:(NROW(r2)-1)]      
+  real  <- r2[(cut+1):NROW(r2)]      
+
+  # Alinear
+  f <- as.numeric(fcast) 
+  y <- as.numeric(real)
+  ok <- !(is.na(f) | is.na(y))
+  f <- f[ok] 
+  y <- y[ok]
+
+  data.frame(
+    n     = n,
+    RMSE  = rmse_loss(y, f),
+    obs   = length(y)
+  )
+}
+dias = c(5,10,20,40)
+
+res = do.call(rbind,lapply(dias, eval_pm, r2=r2, cut = cut))
+
+res
+```
+
+Para este caso nuestro M optimo es de 5
+
+```{r}
+m_optimo = 5 
+```
+
+Construiremos una estimacion de una varianza para el dia
+
+```{r}
+library(lubridate)
+date(last(precio))+1
+```
+
+```{r}
+mean(last(r2,m_optimo))
+```
+
+```{r}
+sqrt(mean(last(r2,m_optimo)))
+```
+
+Este valor presenta una estimacion de la volatilidad para el dua 10 de octubre.
+
+Antes haciamos esto
+
+```{r}
+sd(rendimiento)*sqrt(252)
+```
