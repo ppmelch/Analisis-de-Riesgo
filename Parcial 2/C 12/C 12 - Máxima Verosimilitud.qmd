@@ -61,7 +61,17 @@ $$
 Que después de derivar parcialmente , queda como :\
 
 $$\sigma^2= \frac{1}{n} \sum^{n}_{i=1}(x_i-\mu)^2$$
-Esto pasa cuando es constante
+Esto pasa cuando es constante.
+
+**Función a Optimizar**
+
+$$
+\max_{\sigma_{i}^{2}} \sum^{n}_{i=1} [-ln~ \sigma_i^2 - \frac{(x_i)^2}{\sigma_i^2}] 
+$$
+
+Donde
+
+$$\sigma^2_i = (1-\lambda) x_i^2 - \lambda\hat{\sigma}^2_{i-1}$$
 
 
 
