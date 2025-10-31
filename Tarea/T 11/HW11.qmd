@@ -1,0 +1,109 @@
+---
+title: "HW 11 : Volatilidad Implícita "
+author: "José Armando Melchor Soto "
+format: html
+editor: visual
+---
+
+## HW 11 : Volatilidad Implícita
+
+### Libraries
+
+```{r}
+library(derivmkts)
+library(quantmod)
+library(ggplot2)
+```
+
+### Parámetros
+
+```{r}
+precios <- c(16, 17, 18, 19, 20, 21, 22, 23, 24, 25 )
+put <- c(1.01, 1.56, 2.36, 3.36, 4.36, 5.36, 6.36, 7.36, 8.36, 9.36)
+So <- 15.65  # Precio actual del activo subyacente
+k <- 16      # Precio de ejercicio
+t <- 12/12    # Tiempo hasta el vencimiento en años
+r <- 0.075  # Tasa de interés libre de riesgo
+c <- 1.42   # Precio de la opción CALL
+d <- 0       # Dividendos (si los hay)
+```
+
+### **Verificar si...**
+
+**Condición cumplida :** No hay Arbitraje
+
+**Condición no cumplida :** Hay arbitraje
+
+```{r}
+ifelse(c>=max(0, So - k * exp(-r * t)), "Condición cumplida", "Condición no cumplida")
+```
+
+Por lo tanto No hay arbitraje
+
+### Volatilidad implícita
+
+Aquí se juntan todas las volatilidades calculadas en un solo vector (resultados) para facilitar su análisis y visualización.
+
+```{r}
+bsputimpvol(So, k, r, t, d, c)
+```
+
+### DataFrame
+
+Relación entre el precio de ejercicio y la volatilidad implícita.
+
+```{r}
+r1 = bsputimpvol(So, precios[1], r, t, d, put[1])
+r2 = bsputimpvol(So, precios[2], r, t, d, put[2])
+r3 = bsputimpvol(So, precios[3], r, t, d, put[3])
+r4 = bsputimpvol(So, precios[4], r, t, d, put[4])
+r5 = bsputimpvol(So, precios[5], r, t, d, put[5])
+r6 = bsputimpvol(So, precios[6], r, t, d, put[6])
+r7 = bsputimpvol(So, precios[7], r, t, d, put[7])
+r8 = bsputimpvol(So, precios[8], r, t, d, put[8])
+r9 = bsputimpvol(So, precios[9], r, t, d, put[9])
+r10 = bsputimpvol(So, precios[10], r, t, d, put[10])
+```
+
+```{r}
+resultados <- c(r1, r2, r3, r4, r5, r6, r7, r8, r9,r10)
+```
+
+```{r}
+df_resultados <- data.frame(
+  K = precios,
+  Put = put,
+  Volatilidad_Imp = round(resultados, 4)
+)
+df_resultados
+```
+
+```{r}
+ggplot(df_resultados, aes(x = K, y = Volatilidad_Imp)) +
+  geom_line(color = "salmon") +
+  geom_point(color = "salmon") +
+  labs(title = "Volatilidad Implícita vs Precio de Ejercicio",
+       x = "Precio de Ejercicio (K)",
+       y = "Volatilidad Implícita") +
+  theme_minimal()
+```
+
+### Volatilidad histórica
+
+Se determina la volatilidad histórica del activo AZO utilizando información real del mercado. Se descargan los precios históricos, se calculan los rendimientos logarítmicos diarios y se anualiza la desviación estándar multiplicándola por la raíz de 252. De esta manera, es posible contrastar la volatilidad histórica con la volatilidad implícita proyectada por el mercado.
+
+```{r}
+clave <- "AZO"
+datos <- new.env()
+getSymbols(clave, env = datos)
+precio <- datos[[clave]][,6]
+rend <- na.omit(diff(log(precio)))
+vol_h <- sd(rend) * sqrt(252)
+vol_h
+```
+
+### Conclusión
+
+Se puede concluir que la volatilidad implícita aumenta conforme el precio de ejercicio se incrementa, pasando de un valor de 0.2267 con un precio de ejercicio de 17, hasta alcanzar su punto más alto de 0.6170 con un precio de ejercicio de 25. En otras palabras, a mayor precio de ejercicio, mayor es también la volatilidad implícita, mostrando una clara tendencia al alza.
+
+La volatilidad histórica del activo, con un valor de 0.2581358, representa la fluctuación real observada en el comportamiento pasado del precio. Al compararla con las volatilidades implícitas, se evidencia que estas son, en su mayoría, más elevadas, lo que sugiere que el mercado prevé una mayor incertidumbre o variabilidad futura en el valor del activo.

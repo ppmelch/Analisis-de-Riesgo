@@ -1,0 +1,134 @@
+---
+title: "HW 9: ARCH and GARCH models"
+format: html
+editor: visual
+author: José Armando Melchor Soto
+institute: ITESO
+---
+
+## Exercises
+
+-   What are the differences between the ARCH model and the GARCH model?
+
+The ARCH model explains current volatility using only past squared returns, so it reacts strongly to recent market shocks but has little memory of older events.
+
+The GARCH model, on the other hand, extends ARCH by including both past squared returns and past variances. This allows it to capture volatility persistence, meaning that periods of high or low volatility tend to last longer.
+
+-   What are the differences between the EWMA model and the GARCH (1, 1) model?
+
+The EWMA model is a simplified version of GARCH(1,1) where there is no constant term and the sum of the parameters equals one. This means it gives more weight to recent observations and has no long-run average volatility — it does not revert to a mean.
+
+The GARCH(1,1) model, in contrast, includes a constant term and requires the sum of parameters to be less than one, so volatility reverts gradually to a long-run level.
+
+In short, EWMA smooths volatility without mean reversion, while GARCH(1,1) captures persistence and reversion toward a long-term variance.
+
+-   Analyze the case of the EWMA and ARCH models to determine if these models have any\
+    characteristics like the GARCH for estimating future volatilities to a period n, when only a period t\
+    is known. If they have it, determine which one it is, if they do not have it explain why. To resolve\
+    this exercise, help yourself with the previous development of future volatility in the GARCH model\
+    and follow the same steps, but with the respective models.
+
+-   Remember that the EWMA model is given by
+
+    $$
+    \sigma^2_t = (1-\lambda)R^2_{t-1}+ \lambda\hat{\sigma}^2_{t-1}
+    $$
+
+-   And that the ARCH (1) model is given by
+
+    $$
+    \sigma^2_t = w + \alpha_1 R^2_{t-1}
+    $$
+
+    **EWMA:**
+
+    $$
+    \sigma^2_t = (1-\lambda)R^2_{t-1}+ \lambda\hat{\sigma}^2_{t-1}
+    $$
+
+    $$
+    \sigma^2_t = R^2_{t-1}+ \lambda(\hat{\sigma}^2_{t-1}- R^2_{t-1})
+    $$
+
+    $$
+    \sigma^2_{t+n} = R^2_{t-1}+ \lambda(\hat{\sigma}^2_{t+n-1}- R^2_{t+n-1})
+    $$
+
+    $$
+    E[\sigma^2_{t+n}] = E[R^2_{t-1}]+\lambda E[\hat{\sigma}^2_{t+n-1}- R^2_{t+n-1}]
+    $$
+
+    $$
+    E[\sigma^2_{t+n}] = E[\hat{\sigma}^2_{t+n-1}]+\lambda E[ \hat{\sigma}^2_{t+n-1}- \hat{\sigma}^2_{t+n-1}]
+    $$
+
+    $$
+    E[\sigma^2_{t+n}] =E[\hat{\sigma}^2_{t+n-1}]
+    $$
+
+    The EWMA model is not very effective for forecasts beyond t+1, since each prediction relies on the previous one. As a result, when forecasting further into the future, the model ends up using an estimate based on another estimate, which can lead to increasing uncertainty and significant variation after several iterations.
+
+-   **ARCH(1):**
+
+    $$
+    \sigma^2_t = w + \alpha_1 R^2_{t-1}
+    $$
+
+$$
+    \sigma^2_{t+n} = (1-\alpha)V_L + \alpha R_{t+n-1}^2  
+    $$ $$
+    \sigma^2_{t+n} - V_L = \alpha(R_{t+n-1}^2 - V_L) 
+    $$ $$
+    E[\sigma^2_{t+n} - V_L ]= \alpha E[R_{t+n-1}^2 - V_L ]
+    $$ $$
+    E[\sigma^2_{t+n} - V_L ]= \alpha E[\sigma^2_{t+n-1} - V_L ]
+    $$
+
+$$
+    E[\sigma^2_{t+n} - V_L ]= \alpha(\alpha E[\sigma^2_{t+n-2} - V_L ]) = \alpha^2E[\sigma^2_{t+n-2}- V_L]
+    $$
+
+$$
+    E[\sigma^2_{t+n} - V_L ]= \alpha(\alpha^2 E[\sigma^2_{t+n-2} - V_L ]) = \alpha^3E[\sigma^2_{t+n-2}- V_L]
+    $$
+
+$$
+    E[\sigma^2_{t+n}] = V_L + \alpha^n E[\sigma^2_t-V_L]
+    $$
+
+The ARCH model is quite similar to the GARCH model, but it differs because it only uses the α parameter and does not include β, meaning it does not account for past volatility. Despite being a simpler specification, ARCH can still provide reliable short-term variance forecasts and serves as a good starting point for modeling volatility.
+
+-   Assume that S&P 500 at close of trading yesterday was 1,040 and the daily volatility of the index\
+    was estimated as 1% per day at that time. The parameters in a GARCH (1,1) model are $w$ =0.000002,\
+    $\alpha$ =0.06, and $\beta$=0.92. If the level of the index at close of trading today is 1,060, what is the new\
+    volatility estimate?
+
+    $$
+    \sigma^2_t = w + \alpha_1 R^2_{t-1}
+    $$
+
+$$
+    \sigma^2_t = 0.000002 + 0.06 * (\frac{1,060}{1,040} -1)^2 + (0.92)(0.01)^2
+    $$
+
+$$
+    \sigma^2_t = 0.000116
+    $$ $$
+    \sigma_t = \sqrt{\sigma^2_t}=\sqrt(0.000116) = 0.01078
+    $$
+
+-   The parameters of a GARCH (1,1) model are estimated as $w$=0.000004, $\alpha$=0.05, and $\beta$=0.92. What is the long-run average volatility and what is the equation describing the way that the variance rate reverts to its long-run average? If the current volatility is 20%per year, what is the expected volatility in 20 days?
+
+$$V_L = \frac{w}{\gamma} = \frac{0.000004}{1-0.05-0.92} = 0.000133$$
+
+Volatilidad Largo plazo = $\sqrt{V_L} = 0.0115$
+
+$$E[\sigma^2_{t+n}] = V_L + (\alpha+\beta)^n E[\sigma_t^2 - V_L]$$
+
+$$\sigma^2_{t+n} = V_L + (\alpha+\beta)^n (\sigma_t^2 - V_L)$$
+
+$$\sigma^2_{t+20} = 0.000133 + (0.05+0.92)^{20} ((\frac{0.2}{\sqrt{252}})^2 - 0.000133)$$
+
+$$\sigma^2_{t+20} = 0.000147$$
+
+$$\sigma_{t+20} = \sqrt{\sigma_{t+20}} = 0.0121 = 1.21\text{%}$$

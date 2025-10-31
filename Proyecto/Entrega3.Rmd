@@ -1,0 +1,476 @@
+---
+title: "Proyecto Final Parte 3"
+author: 
+  - "Sofia Hinojosa - 742594"
+  - "Julieta Madrigal - 744029"
+  - "Sharon Manzano - 748293"
+  - "Jose Armando Melchor - 745697"
+  - "Isabela Torres-Septien - 730667"
+date: "2025-10-14"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged 
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r message=FALSE}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+library(readxl)
+library(tibble)
+library(ggplot2)
+library(WDI)
+library(tidyr)
+library(moments)
+library(zoo)
+```
+
+:::: {style="text-align: justify;"}
+# Introducción
+
+En esta tercera entrega se realiza un análisis estadístico y
+probabilístico del comportamiento de Inbursa. Se estiman los
+rendimientos y la volatilidad tanto diaria como anualizada por cada año
+del periodo disponible, lo que permite evaluar con precisión el perfil
+de riesgo-rentabilidad del activo. A partir de esta información, se
+aplican pruebas de normalidad sobre los rendimientos, los precios y el
+logaritmo de los precios, así como una prueba de hipótesis para
+determinar si el rendimiento promedio es estadísticamente igual a cero.
+
+Con los parámetros diarios de la distribución del periodo completo de
+cotización, se construye la ecuación diferencial estocástica que modela
+el comportamiento esperado del precio. Esta ecuación se utiliza para
+simular trayectorias aleatorias y estimar el precio en horizontes de 10,
+20 y 40 días, incluyendo intervalos de confianza del 95%. De forma
+análoga, se emplean los parámetros anuales para formular la ecuación
+logarítmica de evolución del precio, con la cual se proyectan
+estimaciones para 3, 6, 9 y 12 meses, también con sus respectivos
+intervalos de confianza.
+
+Finalmente, se establece una discusión crítica sobre la validez de los
+supuestos teóricos de normalidad en relación con los datos reales
+observados, y se reflexiona sobre las implicaciones que tiene el modelo
+estocástico en la interpretación financiera del comportamiento del
+activo.
+
+# Análisis estadístico base
+
+El análisis se realizó con el objetivo de estimar los rendimientos, la
+volatilidad y las estadísticas descriptivas de las acciones de
+GFINBURO.MX. Para ello, se emplearon datos históricos de precios de
+cierre ajustados, desde el inicio de la cotización del activo hasta la
+última fecha disponible.
+
+### Visualización inicial de los rendimientos y la volatilidad
+
+```{r}
+clave <- "GFINBURO.MX"
+datos <- new.env()
+
+getSymbols(clave, from = "1990-01-01", to="2025-12-31", env=datos)
+
+precio <- datos[[clave]][,6]
+rt <- na.omit(diff(log(precio)))
+
+t_anual = 252
+```
+
+```{r}
+plot(rt, main="Rendimiento de las acciones de GFINBURO.MX", col="palevioletred")
+```
+
+Los rendimientos se muestran en la figura anterior, donde se observa que
+tienden a oscilar en un rango aproximado entre 0.1 y -0.1. No obstante,
+existen periodos en los que se presenta una mayor volatilidad,
+particularmente hacia finales de 2005 e inicios de 2006, así como
+durante los años 2009 y 2021. Estas fluctuaciones más amplias reflejan
+episodios de mayor incertidumbre en el mercado, posiblemente asociados a
+factores económicos o financieros que incrementaron la variabilidad en
+el precio de la acción.
+
+```{r}
+volatilidad_rolling <- rollapply(rt, width = 21, FUN = sd, fill = NA, align = "right")
+volatilidad_rolling_anual <- volatilidad_rolling * sqrt(252)
+
+
+plot(volatilidad_rolling_anual,
+     main = "Volatilidad móvil (21 días) de GFINBURO.MX",
+     col = "cadetblue",
+     ylab = "Volatilidad anualizada",
+     xlab = "Fecha")
+
+```
+
+La figura anterior muestra la volatilidad móvil anualizada de las
+acciones de GFINBURO.MX, calculada con una ventana de 21 días. En
+general, se observa que la volatilidad tiende a fluctuar entre 0.2 y
+0.4, lo que indica niveles moderados de variación en los rendimientos
+durante la mayor parte del periodo analizado.
+
+Sin embargo, existen varios momentos en los que la volatilidad se
+incrementa de forma significativa, alcanzando valores cercanos o
+superiores a 1.0. Estos picos reflejan momentos de alta incertidumbre o
+de fuertes movimientos en el precio de la acción. En particular, se
+destacan aumentos notables en la volatilidad hacia finales de 2005 e
+inicios de 2006, durante la crisis financiera de 2009, y nuevamente
+alrededor de 2021, periodo asociado a la volatilidad generalizada en los
+mercados financieros globales.
+
+Después de estos episodios, la volatilidad tiende a estabilizarse y
+regresar a niveles más bajos, lo que sugiere una recuperación en la
+estabilidad del activo.
+
+------------------------------------------------------------------------
+
+### Cálculo de rendimientos y volatilidad diaria y anual
+
+Se calcularon los rendimientos y la volatilidad tanto diaria como
+anualizada para cada año del periodo disponible. Dichos resultados
+fueron calculados de la siguiente forma:
+
+Sea $r_i$ el rendimiento diario en el día $i$ y $N$ el número total de
+días hábiles en el periodo analizado:
+
+**Rendimiento diario:** es el promedio de los rendimientos diarios
+multiplicado por 100 para expresarlo en porcentaje.
+
+$$
+\text{rendimiento diario}=\frac{1}{N} \sum_{i=1}^{N} r_i \times 100
+$$ **Volatilidad diaria:** es la desviación estándar de los rendimientos
+diarios multiplicada por 100 para expresarla en porcentaje.
+
+$$
+x= \frac{1}{N-1} \sum_{i=1}^{N} (r_i - \bar{r})^2
+$$
+
+$$
+\text{volatilidad diaria} = \sqrt{x} \times 100
+$$ **Rendimiento anual:** es el promedio de los rendimientos diarios
+multiplicado por 100 y por 252 (días hábiles en un año). $$
+\text{rendimiento anual}=\frac{1}{N} \sum_{i=1}^{N} r_i \times 100 \times 252
+$$ **Volatilidad anual:** es la desviación estándar de los rendimientos
+diarios multiplicada por 100 y por la raíz cuadrada de 252 (días hábiles
+en un año).
+
+$$
+y = \frac{1}{N-1} \sum_{i=1}^{N} (r_i - \bar{r})^2
+$$ $$
+\text{volatilidad anual} = \sqrt{y} \times 100 \times \sqrt{252}
+$$ **Resultados**
+
+```{r}
+
+names(rt) <- "rend"
+resultados <- rt %>% 
+  as_tibble() %>% 
+  mutate(Año = year(index(rt))) %>% 
+  group_by(Año) %>% 
+  summarise(
+    "Rendimiento diario" = mean(rend, na.rm = TRUE) * 100,
+    "Volatilidad diaria" = sd(rend, na.rm = TRUE) * 100,
+    "Rendimiento anual" = mean(rend, na.rm = TRUE) * 252 * 100,
+    "Volatilidad anual" = sd(rend, na.rm = TRUE) * sqrt(252) * 100
+  )
+resultados
+```
+
+**Resultados globales**
+
+```{r}
+resultados_globales <- data.frame(
+  "Rendimiento diario" = mean(rt, na.rm = TRUE) * 100,
+  "Volatilidad diaria" = sd(rt, na.rm = TRUE) * 100,
+  "Rendimiento anual" = mean(rt, na.rm = TRUE) * 252 * 100,
+  "Volatilidad anual" = sd(rt, na.rm = TRUE) * sqrt(252) * 100
+)
+resultados_globales
+```
+
+La tabla muestra el rendimiento diario, volatilidad diaria, rendimiento
+anual y volatilidad anual calculados para todo el periodo de cotización
+del activo. Estos valores proporcionan una visión general del
+comportamiento del activo a lo largo del tiempo.
+
+------------------------------------------------------------------------
+
+### Estadísticos descriptivos anuales
+
+```{r}
+names(rt) <- "rend"
+
+estadisticos_anuales <- rt %>%
+  as_tibble() %>%
+  mutate(Año = year(index(rt))) %>%
+  group_by(Año) %>%
+  group_modify(~ {
+    data.frame(
+      "Prcentil 1" = quantile(.x$rend, 0.01, na.rm = TRUE) * 100,
+      "Percentil 5" = quantile(.x$rend, 0.05, na.rm = TRUE) * 100,
+      "Percentil 95" = quantile(.x$rend, 0.95, na.rm = TRUE) * 100,
+      "Percentil 99" = quantile(.x$rend, 0.99, na.rm = TRUE) * 100,
+      "Asimetría" = skewness(.x$rend, na.rm = TRUE),
+      "Curtosis" = kurtosis(.x$rend, na.rm = TRUE),
+      "Mínimo" = min(.x$rend, na.rm = TRUE) * 100,
+      "Máximo" = max(.x$rend, na.rm = TRUE) * 100
+    )
+  })
+estadisticos_anuales
+```
+
+Se calcularon los estadísticos descriptivos anuales de los rendimientos
+diarios, incluyendo percentiles (1, 5, 95 y 99), asimetría, curtosis,
+mínimo y máximo. Estos estadísticos proporcionan una visión detallada de
+la distribución de los rendimientos en cada año del periodo analizado.
+
+Los percentiles 1 y 5 reflejan pérdidas extremas, mientras que los
+percentiles 95 y 99 muestran ganancias significativas.
+
+La asimetría es generalmente cercana a cero, indicando distribuciones
+casi simétricas, aunque en años como 2005 se observa sesgo negativo por
+caídas fuertes. La curtosis supera 3 casi siempre, señalando presencia
+de valores extremos.
+
+------------------------------------------------------------------------
+
+### Estimación de precios a corto plazo
+
+Para la estimación de precios a corto plazo , se utiliza la ecuación
+$dS$ :
+
+$$dS=S_0\mu dt + S_0\sigma dW$$ Donde :
+
+\- $S_0 =$ Es el precio actual.
+
+\- $\mu =$ Es el rendimiento esperado.
+
+\- $\sigma =$ Es la volatilidad de los rendimientos.
+
+\- $dt =$ Es el diferencial del tiempo.
+
+\- $dW =$ Es un proceso de Wiener.
+
+**Parámetros**
+
+```{r}
+sim <- 100000
+S0 <- as.numeric(tail(precio, 1))
+mu <- mean(rt)
+sigma <- sd(rt)
+```
+
+**Para 10 días**
+
+```{r}
+T <- 10 
+dt <- 1/252
+t <- seq(0, T, length.out=(T+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T)))
+  ds <- S0*mu*t+S0*sigma*W
+  Pfinal[i] <- ds[(T+1)]
+}
+
+intervalo1 <- S0+quantile(Pfinal, 0.025)
+intervalo2 <- S0+quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", S0 + mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+```
+
+**Para 20 días**
+
+```{r}
+T <- 20 
+dt <- 1/252
+t <- seq(0, T, length.out=(T+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T)))
+  ds <- S0*mu*t+S0*sigma*W
+  Pfinal[i] <- ds[(T+1)]
+}
+
+intervalo1 <- S0+quantile(Pfinal, 0.025)
+intervalo2 <- S0+quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", S0 + mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+```
+
+**Para 40 días**
+
+```{r}
+T <- 40 
+dt <- 1/252
+t <- seq(0, T, length.out=(T+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T)))
+  ds <- S0*mu*t+S0*sigma*W
+  Pfinal[i] <- ds[(T+1)]
+}
+
+intervalo1 <- S0+quantile(Pfinal, 0.025)
+intervalo2 <- S0+quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", S0 + mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+```
+
+------------------------------------------------------------------------
+
+### Estimación de precios a largo plazo
+
+Para la estimación de precios a largo plazo , se utiliza la ecuación
+$S_t$ :
+
+$$S_t=S_0+e^{(\mu-\frac{1}{2}\sigma^2)dt+\sigma dW}$$
+
+Donde:
+
+\- $S_0 =$ Es el precio actual de la acción.
+
+\- $\mu =$ Es el rendimiento esperado.
+
+\- $\sigma =$ Es la volatilidad de los rendimientos.
+
+\- $dt =$ Es el diferencial del tiempo.
+
+\- $dW =$ Es un proceso de Wiener.
+
+**Parámetros**
+
+```{r}
+sim <- 100000
+S0 <- as.numeric(tail(precio, 1))
+mu <- mean(rt) * 252
+sigma <- sd(rt)*sqrt(252)
+```
+
+**Para 3 meses**
+
+```{r}
+T <- (252/4)/252
+dt <- T/(T*252)
+t <- seq(0, T, length.out=(T*252+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- S0*exp((mu-0.5*sigma^2)*t+sigma*W)
+  Pfinal[i] <- St[(T*252+1)]}
+
+
+
+intervalo1 <- quantile(Pfinal, 0.025)
+intervalo2 <- quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+```
+
+**Para 6 meses**
+
+```{r}
+T <- (252/2)/252
+dt <- T/(T*252)
+t <- seq(0, T, length.out=(T*252+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- S0*exp((mu-0.5*sigma^2)*t+sigma*W)
+  Pfinal[i] <- St[(T*252+1)]}
+
+intervalo1 <- quantile(Pfinal, 0.025)
+intervalo2 <- quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+```
+
+**Para 9 meses**
+
+```{r}
+T <- ((3*252)/4)/252
+dt <- T/(T*252)
+t <- seq(0, T, length.out=(T*252+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- S0*exp((mu-0.5*sigma^2)*t+sigma*W)
+  Pfinal[i] <- St[(T*252+1)]}
+
+intervalo1 <- quantile(Pfinal, 0.025)
+intervalo2 <- quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+
+
+```
+
+**Para 12 meses**
+
+```{r}
+T <- 1
+dt <- T/(T*252)
+t <- seq(0, T, length.out=(T*252+1))
+
+Pfinal <- numeric(sim)
+
+for (i in 1:sim) {
+  W <- c(0, cumsum(sqrt(dt)*rnorm(T*252)))
+  St <- S0*exp((mu-0.5*sigma^2)*t+sigma*W)
+  Pfinal[i] <- St[(T*252+1)]}
+
+intervalo1 <- quantile(Pfinal, 0.025)
+intervalo2 <- quantile(Pfinal, 0.975)
+
+cat("=== Resultados de la simulación ===\n")
+cat(sprintf("Precio esperado: %.2f\n", mean(Pfinal)))
+cat(sprintf("Intervalo de Confianza 95%%: [%.2f, %.2f]\n", intervalo1, intervalo2))
+cat("===============================\n")
+
+```
+
+------------------------------------------------------------------------
+
+# Referencias
+
+::: {style="background-color:#f0f8ff; padding:15px; border-left:5px solid #4682b4;"}
+Yahoo Finance. (2025). GFINBURO.MX – Grupo Financiero Inbursa, S.A.B. de
+C.V. Historical Data. Recuperado de
+<https://finance.yahoo.com/quote/GFINBURO.MX>
+:::
+::::

@@ -1,0 +1,46 @@
+---
+title: "HW 10 : Repaso Parcial 2 "
+author: "José Armando Melchor Soto "
+format: html
+editor: visual
+---
+
+## HW 10 : Repaso Parcial 2
+
+1.  ¿Qué modelos de varianza consideran una ponderación constante de los rendimientos?
+
+2.  ¿Qué modelos de varianza permiten hacer estimaciones futuras a más de un día?
+
+3.  ¿Qué modelos de varianza consideran que existe una varianza de largo plazo?
+
+4.  Escribe la forma matemática de los siguientes modelos para la estimación de varianza:
+
+5.  Explica por qué, al calcular la volatilidad histórica, se asume que el valor medio diario de los\
+    rendimientos 𝜇 es estadísticamente insignificante y puede considerarse cero. ¿Qué\
+    implicaciones tiene esta simplificación en los cálculos?
+
+6.  Discute las limitaciones de suponer que la volatilidad es constante a lo largo del tiempo. ¿Qué\
+    evidencias empíricas sugieren que esta suposición no siempre se cumple para los activos\
+    financieros?
+
+7.  Compara los diferentes modelos mencionados para estimar la volatilidad no constante, como el\
+    modelo de media móvil exponencialmente ponderada (EWMA) y los modelos de\
+    heterocedasticidad condicional autoregresiva (ARCH, GARCH). ¿Cuáles son las principales\
+    diferencias?
+
+8.  Considera que el precio de un activo es de \$50 y su volatilidad anual es del 60%. ¿Cuál sería la\
+    variación esperada del precio en un día considerando dos desviaciones estándar diarias?
+
+9.  Un inversor decide ajustar el valor de 𝜆 en su modelo EWMA de 0.95 a 0.85 para calcular la\
+    volatilidad de un activo. ¿Cómo impactaría este cambio en las estimaciones de volatilidad\
+    futuras? ¿Qué diferencias esperarías en la importancia dada a los rendimientos recientes frente\
+    a los rendimientos más antiguos?
+
+10. ¿Por medio de que metodología que encuentran los parámetros óptimos en el modelo EWMA?
+
+11. Con tus propias palabras describe cual es el procedimiento para seleccionar un modelo de la\
+    familia ARCH-GARCH que ajuste a una serie de datos.
+
+12. Se busca estimar un modelo de varianza por medio de promedios móviles para una serie. Se\
+    obtuvieron los siguientes indicadores. ¿Cuál sería el mejor valor para m? Justifica tu respuesta\
+    y escribe el modelo propuesto
