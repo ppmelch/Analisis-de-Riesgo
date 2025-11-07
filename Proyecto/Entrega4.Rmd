@@ -1,0 +1,130 @@
+---
+title: "Proyecto Final Parte 4"
+author: 
+  - "Sofia Hinojosa - 742594"
+  - "Julieta Madrigal - 744029"
+  - "Sharon Manzano - 748293"
+  - "Jose Armando Melchor - 745697"
+  - "Isabela Torres-Septien - 730667"
+date: "2025-11-11"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged 
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Libraries
+
+```{r message=FALSE}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+library(readxl)
+library(tibble)
+library(ggplot2)
+library(WDI)
+library(tidyr)
+library(moments)
+library(zoo)
+library(kableExtra)
+set.seed(123)
+```
+
+Con los resultados obtenidos, se observa que para m = 5 los valores de
+RMSE y EAMP son menores en comparación con los demás periodos
+analizados. Esto indica que la ventana de 5 días ofrece un mejor ajuste
+entre la varianza estimada y los rendimientos observados, por lo que se
+considera el valor óptimo del modelo de media móvil.
+
+:::: {style="text-align: justify;"}
+## Introducción
+
+## Datos
+
+```{r}
+clave <- "GFINBURO.MX"
+datos <- new.env()
+
+getSymbols(clave, to="2025-11-05", env=datos)
+
+precio <- datos[[clave]][,6]
+ret <- na.omit(diff(log(precio)))
+
+plot(rt, main="Rendimiento de las acciones de GFINBURO.MX", col="palevioletred")
+```
+
+## Modelos de Promedio Móvil
+
+Se estimaron las volatilidades mediante promedios móviles con ventanas
+de m = 5, 10, 20 y 40 días. Cada m define cuántos datos pasados se usan
+para calcular la varianza: valores pequeños responden rápido a los
+cambios, mientras que valores grandes suavizan más la serie. El
+desempeño se evaluó con los errores RMSE, EAMP y ECPP, que miden la
+precisión y consistencia del modelo.
+
+```{r}
+rend_2 <- rt^2
+
+var_5  <- SMA(rend_2, n = 5 + 1)
+var_10 <- SMA(rend_2, n = 10 + 1)
+var_20 <- SMA(rend_2, n = 20 + 1)
+var_40 <- SMA(rend_2, n = 40 + 1)
+
+RMSE <- tibble(
+  "m = 5"  = sqrt(mean(na.omit((rend_2 - var_5)^2))),
+  "m = 10" = sqrt(mean(na.omit((rend_2 - var_10)^2))),
+  "m = 20" = sqrt(mean(na.omit((rend_2 - var_20)^2))),
+  "m = 40" = sqrt(mean(na.omit((rend_2 - var_40)^2)))
+)
+
+EAMP <- tibble(
+  "m = 5"  = mean(abs(na.omit(rend_2 - var_5))),
+  "m = 10" = mean(abs(na.omit(rend_2 - var_10))),
+  "m = 20" = mean(abs(na.omit(rend_2 - var_20))),
+  "m = 40" = mean(abs(na.omit(rend_2 - var_40)))
+)
+
+w <- merge.xts(
+  (na.omit(var_5  - rend_2) / na.omit(rend_2))^2,
+  (na.omit(var_10 - rend_2) / na.omit(rend_2))^2,
+  (na.omit(var_20 - rend_2) / na.omit(rend_2))^2,
+  (na.omit(var_40 - rend_2) / na.omit(rend_2))^2
+)
+w <- subset(w, w$SMA != "Inf")
+ECPP <- sqrt(colMeans(na.omit(w)))
+
+tabla_comparativa <- tibble(
+  M     = c("M = 5", "M = 10", "M = 20", "M = 40"),
+  RMSE  = unlist(RMSE),
+  EAMP  = unlist(EAMP),
+  ECPP  = unlist(ECPP)
+)
+
+tabla_comparativa %>%
+  kbl(caption = "", digits = 6, align = "c") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("hover", "striped")) %>%
+  row_spec(1, bold = TRUE, color = "white", background = "palevioletred")
+```
+
+Con los resultados obtenidos, se observa que para m = 5 los valores de
+RMSE y EAMP son menores en comparación con los demás periodos
+analizados. Esto indica que la ventana de 5 días ofrece un mejor ajuste
+entre la varianza estimada y los rendimientos observados, por lo que se
+considera el valor óptimo del modelo de media móvil.
+
+## Conclusión
+
+# Referencias
+
+::: {style="background-color:#f0f8ff; padding:15px; border-left:5px solid #4682b4;"}
+Yahoo Finance. (2025). GFINBURO.MX – Grupo Financiero Inbursa, S.A.B. de
+C.V. Historical Data. Recuperado de
+<https://finance.yahoo.com/quote/GFINBURO.MX>
+:::
+::::

@@ -1,0 +1,125 @@
+---
+title: "HW 12: VaR Parametric assets"
+author: "José Armando Melchor Soto "
+format: html
+editor: visual
+---
+
+# HW 12: VaR Parametric assets
+
+1.  Consider a portfolio containing 50 TLEVISA.CPO shares and 30 GFNORTEO shares. The\
+    strike price of the first issuer is \$25.44 with an estimated annual volatility of 38%. While the\
+    second issuer ́s strike price is \$67.16, and its estimated annual volatility is 25%. The correlation\
+    between both is 30%.
+
+    1.  Calculate the initial value of the portfolio, which is equivalent to the number of shares\
+        of issuer 1 times its corresponding strike price, plus the number of shares of issuer 2\
+        times its corresponding strike price.
+
+        $$
+        p_{value} = 50(25.44) + 30(67.16) = $3,286.80 
+        $$
+
+    2.  Use the correlation provided to find the covariance between both assets. When\
+        estimating the volatility (standard deviation) of each asset, don't forget to express it\
+        in daily terms. EQ.4
+
+        $$
+         \sigma_T = \frac{0.38}{\sqrt{252}} = 0.0239
+        $$
+
+        $$
+        \sigma_T = \frac{0.25}{\sqrt{252}}  =0.0157
+        $$
+
+        $$
+        cov = (0.3)(0.0239)(0.0157) = 0.000113 = 0.0113 %
+        $$
+
+    3.  Create the matrix of covariance-variances (Use EQ.3)
+
+    $$
+    C = \begin{bmatrix}{0.0239^2} & {0.000113} \\{0.000113} & {0.0157^2}\end{bmatrix}
+    $$
+
+    4.  Calculate the weight vector 𝑤. This vector must have only two values since there are\
+        only two assets in the portfolio.
+
+        $$
+        w = \begin{bmatrix}{\frac{50(25.44)}{3,286.8}} & {\frac{30(67.16)}{3286.8}} \end{bmatrix} = \begin{bmatrix}{0.3870} & {0.6130} \end{bmatrix}
+        $$
+
+    5.  Use your results in c and d, to calculate the volatility of the portfolio (Use EQ. 2)\
+        This volatility is in daily terms.
+
+        $$
+        \sigma = \sqrt{\begin{bmatrix}{0.3870} & {0.6130} \end{bmatrix} \begin{bmatrix}{0.0239^2} & {0.000113} \\{0.000113} & {0.0157^2}\end{bmatrix} \begin{bmatrix}{0.3870}  \\{0.6130} \end{bmatrix} } =  0.0152 = 1.52% 
+        $$
+
+    6.  Based on your result in e and a, to determine the value-at-risk of the portfolio with a 95% of significance level for a day. Since we express 𝜎+ 𝜎, in daily terms in the exercise b calculated volatility is daily.
+
+    $$
+    VaR = -1.645(3,286.8)0.0152\sqrt{1} = -$82.18
+    $$
+
+    7.  We learned that 𝑽𝒂𝑹𝒏 𝒅𝒊𝒂𝒔 = √𝒏𝑽𝒂𝑹𝟏 𝒅𝒊𝒂 . Calculate VaR for 10 days.
+
+    $$
+    VaR_{10D} = \sqrt{10}(-82.18) = -$252.89
+    $$
+
+2.  Consider a portfolio containing only 50 TLEVISA.CPO shares whose strike price is \$25.44\
+    and whose estimated annual volatility is 38%. Calculate VaR for 1 day at 95%. Use EQ.1\
+    where volatility corresponds to the volatility of the return of the single asset in the portfolio
+
+    $$
+    pos = 50(25.44) = $ 1, 272
+    $$
+
+$$
+\sigma = \frac{0.38}{\sqrt{252}}= 0.0239
+$$
+
+$$
+VaR = -1.645 (1,272)(0.0239)\sqrt{1} = -$50.01
+$$
+
+3.  Consider a portfolio containing only 30 GFNORTEO shares whose strike price is \$67.16 and\
+    whose estimated annual volatility is 25%. Calculate VaR for 1 day at 95%. Use EQ.1 where\
+    volatility corresponds to the volatility of the return of the single asset in the portfolio.
+
+    $$
+    pos = 50(67.16) = $ 2,014.8
+    $$
+
+    $$
+    \sigma = \frac{0.25}{\sqrt{252}}= 0.0157
+    $$
+
+    $$
+    VaR = -1.645 (2,014.8)0.0157\sqrt{1} = -$52.04
+    $$
+
+4.  Sum the results of 2. and 3. and subtract them with results in 1. f). How much do you obtain?\
+    This difference is known as the benefits of diversification. And it equates to the benefit of\
+    having a diversified portfolio with two assets instead of having two portfolios with one asset.\
+    Each of the calculations in 2. and 3. is called the individual VaR of the portfolio and the\
+    one obtained in 1. f) is the total VaR of the portfolio.
+
+$$
+-82.18-(-50.01-52.04) = $ 19.87
+$$
+
+5\. As you may have noticed, the sum of the individual VaRs is greater than the total VaR of the portfolio. There is a rule that allows us to obtain the total VaR of the portfolio using the individual VaRs. For our example of two assets, we have
+
+![](images/clipboard-1413986641.png)
+
+Indicating that the total VaR of a portfolio is equal to the square root of the multiplication of the individual VaRs multiplied by the correlation matrix and the transposed of the individual VaR. Use the EQ.5 to check your result. For this, it considers that 𝑉𝑎𝑅 ( it is the result obtained in 1 f) 𝑉𝑎𝑅1it is the result obtained in 2, 𝑉𝑎𝑅2it is the result obtained in 3. and 𝜌 is the correlation between both assets described in 1.
+
+$$
+82.18 =  \sqrt{\begin{bmatrix}{50.01} & {52.04} \end{bmatrix} \begin{bmatrix}{1} & {0.3} \\ {0.3}&{1}   \end{bmatrix} \begin{bmatrix}{50.01} \\ {52.04} \end{bmatrix}}
+$$
+
+$$
+82.18 = 82.28
+$$

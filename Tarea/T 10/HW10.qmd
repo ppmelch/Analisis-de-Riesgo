@@ -9,38 +9,254 @@ editor: visual
 
 1.  ¿Qué modelos de varianza consideran una ponderación constante de los rendimientos?
 
+    La Media Móvil
+
 2.  ¿Qué modelos de varianza permiten hacer estimaciones futuras a más de un día?
+
+    Lso modelos de ARCH y GARCH.
 
 3.  ¿Qué modelos de varianza consideran que existe una varianza de largo plazo?
 
+    Los modelos de ARCH y GARCH.
+
 4.  Escribe la forma matemática de los siguientes modelos para la estimación de varianza:
 
+    1.  Promedio Móvil (m=10)
+
+        $$
+        \sigma_t^2 = \frac{1}{10} \sum^{10}_{i=1} R_i^2
+        $$
+
+    2.  EWMA($\lambda$)
+
+        $$
+        \sigma^2_t = (1-0.94)R_{t-1}^2 + \alpha_2 R_{t_2}^2
+        $$
+
+    3.  ARCH(2)
+
+        $$
+        \sigma^2_t = w+\alpha_1 R^2_{t-1} + \alpha_2 R_{t-2}^2
+        $$
+
+    4.  GARCH(2,1)
+
+        $$
+        \sigma^2_t = w + \alpha_1R_{t-1}^2 + \alpha_2R^2_{t-2} + \beta_1\sigma^2_{t-1}
+        $$
+
 5.  Explica por qué, al calcular la volatilidad histórica, se asume que el valor medio diario de los\
-    rendimientos 𝜇 es estadísticamente insignificante y puede considerarse cero. ¿Qué\
-    implicaciones tiene esta simplificación en los cálculos?
+    rendimientos 𝜇 es estadísticamente insignificante y puede considerarse cero. ¿Qué implicaciones tiene esta simplificación en los cálculos?
+
+    Se asume que $\mu= 0$ porque los rendimientos diarios son muy pequeños y las pruebas estadísticas no muestran diferencias significativas respecto a cero. Esta simplificación solo es válida en el corto plazo, ya que al anualizar los datos μ deja de ser despreciable. Además, al asumirlo cero se omite el posible sesgo de la distribución, lo cual puede ser relevante si se prefieren mayores rendimientos positivos (colas derechas más pesadas).
 
 6.  Discute las limitaciones de suponer que la volatilidad es constante a lo largo del tiempo. ¿Qué\
     evidencias empíricas sugieren que esta suposición no siempre se cumple para los activos\
     financieros?
+
+    La principal limitación de esta suposición es que puede reducir la precisión de las proyecciones al introducir sesgos en los resultados. Además, la evidencia empírica muestra que la volatilidad tiende a agruparse, lo que indica que no es constante y, por tanto, el supuesto no siempre se cumple.
 
 7.  Compara los diferentes modelos mencionados para estimar la volatilidad no constante, como el\
     modelo de media móvil exponencialmente ponderada (EWMA) y los modelos de\
     heterocedasticidad condicional autoregresiva (ARCH, GARCH). ¿Cuáles son las principales\
     diferencias?
 
+    **Principales diferencias entre los modelos EWMA, ARCH y GARCH:**
+
+    -   **EWMA:**\
+        Pondera los rendimientos pasados con un peso decreciente, dando mayor relevancia a los más recientes.\
+        Requiere estimar un valor óptimo de $\lambda$ que maximice la verosimilitud.\
+        Utiliza todos los datos y, aunque es un modelo sencillo y rápido, no captura adecuadamente los cambios en la volatilidad.
+
+    -   **ARCH:**\
+        Asigna ponderaciones distintas a un número limitado de rendimientos pasados. $$\alpha_1, \alpha_2, \dots, \alpha_p$$\
+        Incluye una varianza de largo plazo y cumple que $$\omega = \gamma V_L$$\
+        $$\gamma + \sum_{i=1}^{p} \alpha_i = 1.$$\
+        Es más complejo que EWMA y permite modelar agrupamientos en la volatilidad.
+
+    -   **GARCH:**\
+        Extiende el modelo ARCH incorporando ponderadores adicionales para la varianza pasada. $$\beta_1, \beta_2, \dots, \beta_q$$\
+        Cumple\
+        $$\gamma + \sum_{i=1}^{p} \alpha_i + \sum_{i=1}^{q} \beta_i = 1.$$\
+        Es el más completo de los tres, pues modela tanto los rendimientos agrupados como la persistencia en la varianza.
+
 8.  Considera que el precio de un activo es de \$50 y su volatilidad anual es del 60%. ¿Cuál sería la\
     variación esperada del precio en un día considerando dos desviaciones estándar diarias?
 
-9.  Un inversor decide ajustar el valor de 𝜆 en su modelo EWMA de 0.95 a 0.85 para calcular la\
+    $$
+    \Delta _{\text{esperada}} = 50[\frac{0.6\sqrt{1}}{252}* 2] = 3.7796
+    $$
+
+9.  Un inversor decide ajustar el valor de $\lambda$ en su modelo EWMA de 0.95 a 0.85 para calcular la\
     volatilidad de un activo. ¿Cómo impactaría este cambio en las estimaciones de volatilidad\
     futuras? ¿Qué diferencias esperarías en la importancia dada a los rendimientos recientes frente\
     a los rendimientos más antiguos?
 
+    Al reducir $\lambda$ de 0.95 a 0.85, el modelo da mayor peso a los rendimientos recientes y olvida más rápido los datos pasados. Esto hace que la volatilidad estimada reaccione con más rapidez a cambios recientes en el mercado, volviéndose más sensible y menos suave que con un λ más alto.
+
 10. ¿Por medio de que metodología que encuentran los parámetros óptimos en el modelo EWMA?
+
+    Se busca que el valor de $\lambda$ pueda máximizar la verosimilitud.
 
 11. Con tus propias palabras describe cual es el procedimiento para seleccionar un modelo de la\
     familia ARCH-GARCH que ajuste a una serie de datos.
 
+    -   Probar distintas especificaciones del modelo, como ARCH(1), GARCH(1,1), GARCH(1,2), entre otras, para ver cuál se ajusta mejor a los datos.
+
+    -   Evaluar la significancia estadística de los coeficientes y descartar aquellos modelos que incluyan variables no significativas, buscando siempre la simplicidad del modelo.
+
+    -   Comparar los modelos restantes y elegir aquel con la mayor verosimilitud (log-likelihood) o con los criterios de información más bajos (como AIC o BIC), ya que indica el mejor ajuste a la serie de datos.
+
 12. Se busca estimar un modelo de varianza por medio de promedios móviles para una serie. Se\
-    obtuvieron los siguientes indicadores. ¿Cuál sería el mejor valor para m? Justifica tu respuesta\
-    y escribe el modelo propuesto
+    obtuvieron los siguientes indicadores. ¿Cuál sería el mejor valor para m? Justifica tu respuesta y escribe el modelo propuesto
+
+    ![](images/clipboard-516888086.png)
+
+    Suponiendo que los valores de m usados para esos resultados son m = 5,10,20,40, el mejor valor para m es 5, ya que aunque no tiene el RMSE más bajo, presenta los menores valores de ECPP y EAMP, logrando el mejor equilibrio entre precisión y estabilidad. En cambio, m=40 tiene el RMSE mínimo pero el ECPP más alto, por lo que no es óptimo.
+
+13. Durante el último año, el rendimiento promedio del precio de Grupo Televisa fue de 26% anual\
+    y su volatilidad diaria se estimó a través de un modelo EWMA, con $\lambda= 0.96$. El día 21 de octubre\
+    el precio era de \$51.95. Con esta información se generó una estimación para la volatilidad del\
+    día 22 de octubre, la cual arrojo un valor de 1.55%.\
+
+    a.  Si para el final del día 22 octubre el pecio se ubicó en \$53.50, efectúa una estimación\
+        para la volatilidad del día 23 de octubre.
+
+    $$\sigma_{\text{d23}} = \sqrt{(1-0.96)(\frac{53.50}{51.95}-1)^2 + (0.96)(0.0155)^2} = 0.0163$$\
+
+    b.  ¿Cuál sería la distribución de probabilidad del rendimiento para el día 23 de octubre? ¿Cuál es la probabilidad de que ese día el rendimiento sea negativo
+
+    <!-- -->
+
+    1.  Distribución de Probabilidad
+
+        $$
+        r_{d23} \text~ N(\frac{0.26}{252}, 0.0163^2) = N(0.00103,0.0163^2)
+        $$
+
+    2.  Probabilidad
+
+        $$
+        P(r_{d23} < 0 ) = P( z < \frac{0-0.00103}{0.0163} = P(z<-0.0632) = 0.4748
+        $$
+
+14. Considera un modelo EWMA con $\lambda = 0.94$. Determina el valor de los ponderadores del rendimiento cuadrado hasta $t-3$.
+
+    Para $R_{t-1}^2$:
+
+    $$w = (1-0.94)(0.94)^0 = 0.06$$
+
+    Para $R_{t-2}^2$:
+
+    $$w = (1-0.94)(0.94)^1 = 0.0564$$
+
+    Para $R_{t-3}^2$:
+
+    $$w = (1-0.94)(0.94)^2= 0.0530$$
+
+15. La varianza para el activo A fue modelada utilizando un EWMA con lambda 0.93. Se proporciona la siguiente información del activo
+
+$$
+\begin{array}{c|c}
+\text{Day} & \text{Price} \\
+\hline
+0 & 46 \\
+1 & 45 \\
+2 & 47 \\
+3 & 43 \\
+4 & 48 \\
+\end{array}
+$$
+
+Si en el día 4 la volatilidad estimada por el modelo fue del 1.75%, utiliza la información proporcionada para determinar lo siguiente:
+
+-   Una volatilidad estimada para el día 5. Asume que el rendimiento promedio es cero.
+
+    $$
+    \sigma_{d5} = \sqrt{(1-0.93)(\frac{0.48}{0.43} -1)^2 + (0.93)(0.0175)^2} = 0.351
+    $$
+
+-   La probabilidad de que el precio del activo sea mayor a \$52 para el día 5. Considera que hoy es el día 4. (Pista: En este caso, ahora tenemos una varianza puntual estimada para el día 5, por lo que la ecuación dS se puede interpretar como: $dS = \mu S dt + S\sigma \sqrt{dt} ϵ$. Calcula $mu$ como el promedio de los rendimientos diarios.
+
+    $$
+    dS = S\mu dt + S\sigma \sqrt{dt} \epsilon
+    $$
+
+    -   Promedio de los rendimientos diarios:
+
+        $$
+        \mu = \frac{(\frac{45}{46}-1)+(\frac{47}{56}-1)+(\frac{43}{47}-1)+(\frac{48}{43}-1)}{4} = 0.0135
+        $$
+
+    -   Sustituyendo **dS**
+
+        $$
+        dS = (48)(0.0135)(1) + (48)(0.0351)\sqrt{1} \epsilon = 0.648 + 1.6848 \epsilon
+        $$
+
+    -   Probabilidad para intervalo de tiempo pequeño
+
+        $$
+        P(dS > 4 ) = P(Z > \frac{4-0.648}{1.6848}) = P(Z>1.99) = 0.0233
+        $$
+
+16. Con tus propias palabras describe el proceso de Máxima Verosimilitud
+
+    Es un método que busca los valores de los parámetros que mejor se ajustan a los datos observados, maximizando la probabilidad de que dichos datos ocurran. Para ello, se define una función de verosimilitud, se transforma en su forma logarítmica para simplificar los cálculos y se determinan los parámetros que hacen máxima esta función.
+
+17. Considerando que los rendimientos del precio tienen un comportamiento normal, escribe la función de verosimilitud que es necesaria maximizar en la técnica de máxima verosimilitud.
+
+$$
+\text{Función de Verosimilitud :} L(\mu, \sigma^2) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x_i - \mu)^2}{2\sigma^2}}
+$$
+
+$$ \text{Función de Log - Verosimilitud: } \ell(\mu,\sigma^2) = -\frac{n}{2} 2\pi\sigma^2 - \frac{1}{2\sigma^2} \sum^n_{i=1} (x_i-\mu)^2 $$
+
+18. Usando un modelo ARCH (1), si el rendimiento diario de un activo fue del 4% y la volatilidad estimada para el día anterior fue del 2%, ¿cuál será la nueva estimación de la volatilidad para el día siguiente, asumiendo $\alpha_0 = 0.1,  \alpha _1 = 0.8$
+
+    $$
+    \sigma_t = \sqrt{0.1+0.8(0.04)^2} = 0.3182
+    $$
+
+19. En un modelo GARCH (1,1) con 𝜔 = 0.000004, 𝛼 = 0.05 y 𝛽 = 0.92, calcula la volatilidad de largo plazo y escribe la ecuación que describe cómo la tasa de varianza regresa a su promedio de largo plazo. ¿Cuál es la volatilidad esperada dentro de 30 días si la volatilidad actual es del 1%?
+
+    $$
+    \text{Varianza de largo plazo: } \sigma_L = \frac{0.000004}{1-0.05-0.92} = \frac{1}{7500}
+    $$
+
+    $$
+    \text{Volatilidad de largo plazo: }\sigma_L = \sqrt{\frac{0.000004}{1-0.05-0.92}} = 0.0115
+    $$
+
+    $$
+    \text{Ecuación: } E[\sigma^2_{t+n}] = V_L + (\alpha-\beta)^n E[\sigma^2_t - V_L]
+    $$
+
+    $$
+    E[\sigma^2_{t+30}] = \frac{1}{7500} + (0.05+0.92)^{30} (0.01^2-\frac{1}{7500}) = 0.00011997 
+    $$
+
+    $$
+    \text{Volatilidad esperada diaria: } \sigma_{t+30} = \sqrt{0.00011997} = 0.01095
+    $$
+
+    $$
+    \text{Volatilidad esperada anual: }\sigma_{t+30} = \sqrt{0.00011997 * 252} = 0.1739
+    $$
+
+20. Al efectuar una prueba de efectos ARCH-GARCH a una serie, se obtuvieron los siguientes resultados. ¿Con base en la prueba que se puede concluir? Justifica detalladamente tu respuesta
+
+    ![](images/clipboard-3754302561.png)
+
+    Estadisticamente no se encuentra evidencia suficiente para rechazar la hipótesis nula, lo que indica que la serie no presenta efectos ARCH-GARCH. En consecuencia, el uso de estos modelos no sería adecuado ni aportaría beneficios en este caso.
+
+21\. Explica con tus propias palabras que son los indicadores AIB y BIC y para que se utilizan.
+
+El AIC y el BIC son criterios que sirven para comparar modelos estadísticos. Ambos miden el equilibrio entre el ajuste del modelo y su complejidad; cuanto menor sea su valor, mejor es el modelo. El BIC penaliza más la cantidad de parámetros que el AIC.
+
+\
+22. Se está tratando de modelar la varianza del rendimiento del activo X. SE han probado 4 diferentes modelos en R, los resultados obtenidos son:
+
+![](images/clipboard-1987040483.png)
+
+Ya que todas las variables mostraron significancia en los modelos analizados, la selección se fundamenta en el valor más elevado de la log-verosimilitud. En consecuencia, se elige el modelo GARCH(1,2), con una log-verosimilitud de 15558.88, por ser el que ofrece el mejor ajuste a la serie.
