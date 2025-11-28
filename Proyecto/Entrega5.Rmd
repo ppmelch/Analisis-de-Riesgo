@@ -1,0 +1,507 @@
+---
+title: "Proyecto Final Parte 5"
+author: 
+  - "Sofia Hinojosa - 742594"
+  - "Julieta Madrigal - 744029"
+  - "Sharon Manzano - 748293"
+  - "Jose Armando Melchor - 745697"
+  - "Isabela Torres-Septien - 730667"
+date: "2025-11-28"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged 
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+library(quantmod)
+library(lubridate)
+```
+
+# Introducción {style="text-align: justify;"}
+
+En esta quinta entrega se construye un portafolio formado por 100
+acciones de Soriana y 100 acciones de Inbursa. A partir de este
+portafolio se calcula el VaR tanto paramétrico como no paramétrico para
+distintos horizontes de tiempo. Además, se realiza un backtesting para
+comparar los resultados de ambos métodos y verificar si el modelo de
+riesgo funciona adecuadamente.
+
+El análisis se basa en datos históricos del 9 de agosto de 2021 al 21 de
+noviembre de 2025. Para cada VaR se consideran horizontes de 1, 5, 10 y
+20 días hábiles, bajo un nivel de confianza del 95%.
+
+En las secciones siguientes se describen los fundamentos de cada tipo de
+VaR, se presentan los resultados correspondientes y, finalmente, se
+lleva a cabo una optimización del portafolio para comparar el desempeño
+entre los distintos modelos utilizados.
+
+# Obtención de datos {style="text-align: justify;"}
+
+```{r}
+soriana <- "SORIANAB.MX"
+ginburo  <- "GFINBURO.MX"
+
+datos <- new.env()
+getSymbols(soriana, env = datos, from="2021-08-09", to="2025-11-21")
+getSymbols(ginburo, env = datos, from="2021-08-09", to="2025-11-21")
+
+soriana_close <- as.numeric(datos[[soriana]][,6])
+ginburo_close  <- as.numeric(datos[[ginburo]][,6])
+
+soriana_close <- datos[[soriana]][,6]
+ginburo_close <- datos[[ginburo]][,6]
+
+soriana_returns <-diff(log(soriana_close))
+ginburo_returns <- diff(log(ginburo_close))
+
+soriana_returns <- na.omit(soriana_returns)
+ginburo_returns <- na.omit(ginburo_returns)
+
+```
+
+# Cálculo del portafolio {style="text-align: justify;"}
+
+```{r}
+
+soriana_last <- as.numeric(last(soriana_close))
+
+ginburo_last <- as.numeric(last(ginburo_close))
+
+portafolio <- 100 * soriana_last + 100* ginburo_last
+
+vo <- portafolio
+
+print(paste("Valor de portafolio actual:", round(vo, 2)))
+```
+
+# VaR No Paramétrico {style="text-align: justify;"}
+
+El VaR no paramétrico, o simulación histórica, calcula el riesgo usando
+únicamente los rendimientos reales del pasado, sin asumir que siguen
+alguna distribución estadística. A partir de estos rendimientos se
+generan escenarios posibles para el valor futuro del portafolio y, con
+ellos, se construye la función de pérdidas y ganancias. El VaR se
+obtiene tomando directamente el percentil correspondiente (por ejemplo,
+el 5% para un VaR al 95%).
+
+Este método tiene la ventaja de reflejar tal cual la asimetría, la
+volatilidad y los eventos extremos que realmente ocurrieron en el
+mercado. Su único límite es que necesita un historial amplio y
+representativo, y parte del supuesto de que los comportamientos pasados
+son una aproximación razonable del riesgo futuro.
+
+## Estimación del Portafolio Futuro y Función de pérdidas y ganancias {style="text-align: justify;"}
+
+```{r}
+
+precio_soriana <- as.numeric(last(soriana_close)) * (1 + soriana_returns)
+precio_inbursa <- as.numeric(last(ginburo_close)) * (1 + ginburo_returns)
+
+v_futuro <- 100 * soriana_close + 100 * ginburo_close
+names(v_futuro) <- "valor_p"
+soriana_precio_futuro <- soriana_last * (1 + soriana_returns)
+ginburo_precio_futuro <- ginburo_last * (1 + ginburo_returns)
+
+portafolio_futuro <- 100*soriana_precio_futuro + 100*ginburo_precio_futuro
+
+funcion_p_l <- portafolio_futuro - portafolio
+```
+
+```{r}
+hist(funcion_p_l, n = 100, col = "palevioletred", 
+     main = "Histograma de Pérdidas y Ganancias")
+```
+
+## VaR No-Paramétrico Para 1 Día {style="text-align: justify;"}
+
+```{r}
+niveles <- c(0.10, 0.05, 0.01)
+horizontes <- 1
+
+VaR_hist <- sapply(horizontes, function(h){
+  quantile(funcion_p_l, probs = niveles) * sqrt(h)
+})
+
+rownames(VaR_hist) <- c("VaR_90", "VaR_95", "VaR_99")
+colnames(VaR_hist) <- paste0(horizontes, " Días")
+
+VaR_hist <- as.data.frame(VaR_hist)
+
+VaR90 <- VaR_hist["VaR_90", "1 Días"]
+VaR95 <- VaR_hist["VaR_95", "1 Días"]
+VaR99 <- VaR_hist["VaR_99", "1 Días"]
+
+VaR_hist
+
+```
+
+## VaR No-Paramétrico Para Diferentes Horizontes {style="text-align: justify;"}
+
+```{r}
+
+niveles <- c(0.10, 0.05, 0.01)
+horizontes <- c(1,5,10,20)
+
+VaR_hist <- sapply(horizontes, function(h){
+  quantile(funcion_p_l, probs = niveles) * sqrt(h)
+})
+
+rownames(VaR_hist) <- c("VaR_90", "VaR_95", "VaR_99")
+colnames(VaR_hist) <- paste0(horizontes, " Días")
+
+VaR_hist <- as.data.frame(VaR_hist)
+VaR_hist
+
+```
+
+## Histograma del VaR No-Paramétrico a un día {style="text-align: justify;"}
+
+```{r}
+hist(funcion_p_l, n = 100, col = "palevioletred", 
+     main = "Histograma de Pérdidas y Ganancias")
+
+col90 <- "#FF8C00"    
+col95 <- "#E34234"    
+col99 <- "#5A0EC0"    
+
+abline(v = VaR90, col = col90, lwd = 2.5)
+abline(v = VaR95, col = col95, lwd = 2.5)
+abline(v = VaR99, col = col99, lwd = 2.5)
+
+legend("topright",
+       legend = c(
+         sprintf("VaR 90%%: %.2f", VaR90),
+         sprintf("VaR 95%%: %.2f", VaR95),
+         sprintf("VaR 99%%: %.2f", VaR99)
+       ),
+       col = c(col90, col95, col99),
+       lty = 1,
+       lwd = 2.5,
+       bty = "n")
+```
+
+## Backtesting {style="text-align: justify;"}
+
+```{r}
+# --- Pérdidas reales para backtesting ---
+g_p <- na.omit(diff(100*soriana_close + 100*ginburo_close))
+
+# --- Función ---
+backtest <- function(PL_real, VaR){
+  mean(PL_real < VaR) * 100
+}
+
+# --- Backtesting correcto usando VaR90, VaR95, VaR99 ---
+var_sup_90 <- backtest(g_p, VaR90)
+var_sup_95 <- backtest(g_p, VaR95)
+var_sup_99 <- backtest(g_p, VaR99)
+
+cat("Probabilidad de superación 90%:", round(var_sup_90, 2), "%\n")
+cat("Probabilidad de superación 95%:", round(var_sup_95, 2), "%\n")
+cat("Probabilidad de superación 99%:", round(var_sup_99, 2), "%\n")
+
+
+```
+
+El VaR No-Paramétrico permitió representar de manera fiel la
+distribución observada de los rendimientos, al no requerir supuestos
+sobre su forma. Esto hizo posible capturar adecuadamente periodos de
+mayor y menor volatilidad, generando estimaciones coherentes con el
+comportamiento real del mercado.
+
+El análisis de backtesting mostró que la proporción de días con pérdidas
+que excedieron el VaR se mantuvo muy cercana a los valores esperados
+teóricamente para los niveles de confianza del 90%, 95% y 99%. Esto
+indica que el VaR No-Paramétrico ofrece un desempeño estable y resulta
+un estimador adecuado para evaluar el riesgo del portafolio.
+
+------------------------------------------------------------------------
+
+# VaR Paramétrico {style="text-align: justify;"}
+
+El Valor en Riesgo (VaR) paramétrico es una metodología que estima la
+pérdida máxima esperada de un portafolio bajo un nivel de confianza
+específico, asumiendo que los rendimientos de los activos siguen una
+Distribución Normal. Este enfoque utiliza como insumos principales la
+media y la volatilidad diaria de los rendimientos, y permite proyectar
+pérdidas potenciales sobre distintos horizontes de tiempo mediante la
+propiedad de escalamiento por raíz del tiempo. Su principal ventaja es
+la simplicidad y rapidez de cálculo, al requerir únicamente parámetros
+estadísticos básicos. Sin embargo, su precisión depende de la normalidad
+de los retornos y la estabilidad de la volatilidad, lo cual puede
+limitar su capacidad para capturar eventos extremos.
+
+## Matriz de Covarianza {style="text-align: justify;"}
+
+```{r}
+
+R <- merge.xts(soriana_returns, ginburo_returns)
+colnames(R) <- c("Soriana", "Inbursa")
+
+covarianza <- cov(R)
+```
+
+```{r}
+w_soriana <- 100 * as.numeric(last(soriana_close)) / vo
+w_inbursa <- 100 * as.numeric(last(ginburo_close)) / vo
+w <- c(w_soriana, w_inbursa)
+print(w)
+```
+
+## Varianza del portafolio
+
+```{r}
+var_port <- as.numeric(t(w) %*% covarianza %*% w)
+var_port
+```
+
+## Volatilidad del Portafolio
+
+```{r}
+vol_port <- sqrt(var_port)
+vol_port
+```
+
+## VaR Paramétrico Para 1 Día
+
+```{r}
+
+z_vals <-  qnorm(c(0.10, 0.05, 0.01))
+
+VaR_vals <- z_vals * vol_port * vo
+ 
+VaR_param_1d <- data.frame(
+  "1 Día" = VaR_vals
+)
+rownames(VaR_param_1d) <- c("VaR_90", "VaR_95", "VaR_99")
+
+VaR_param_1d
+
+```
+
+## VaR Paramétrico para diferentes horizontes de tiempo
+
+```{r}
+
+z_vals <- qnorm(c(0.10, 0.05, 0.01)) 
+
+horizontes <- c(1,5,10,20)
+
+VaR_param <- sapply(horizontes, function(h){
+  z_vals * vol_port * vo * sqrt(h)
+})
+
+rownames(VaR_param) <- c("VaR_90", "VaR_95", "VaR_99")
+colnames(VaR_param) <- paste0(horizontes, " Días")
+
+VaR_param <- as.data.frame(VaR_param)
+
+VaR_param
+
+
+```
+
+## Backtesting {style="text-align: justify;"}
+
+```{r}
+
+
+# --- Pérdidas reales ---
+g_p <- na.omit(diff(100*soriana_close + 100*ginburo_close))
+
+# --- Backtesting Paramétrico ---
+backtest <- function(PL_real, VaR){
+  mean(PL_real < VaR) * 100
+}
+
+VaR90_p <- VaR_param_1d["VaR_90", "X1.Día"]
+VaR95_p <- VaR_param_1d["VaR_95", "X1.Día"]
+VaR99_p <- VaR_param_1d["VaR_99", "X1.Día"]
+
+var_sup_90 <- backtest(g_p, VaR90_p)
+var_sup_95 <- backtest(g_p, VaR95_p)
+var_sup_99 <- backtest(g_p, VaR99_p)
+
+cat("Probabilidad de superación 90%:", round(var_sup_90, 2), "%\n")
+cat("Probabilidad de superación 95%:", round(var_sup_95, 2), "%\n")
+cat("Probabilidad de superación 99%:", round(var_sup_99, 2), "%\n")
+
+```
+
+El VaR Paramétrico estimó pérdidas de −129.55, −166.27 y −235.16, para
+los niveles de confianza del 90%, 95% y 99%. Al aplicar el backtesting,
+las proporciones de días con pérdidas mayores al VaR fueron 7.32%, 3.71%
+y 1.30%, cifras inferiores a los valores teóricos esperados. Esto
+muestra que el modelo ofreció estimaciones más conservadoras, pero
+mantuvo un desempeño estable y consistente con el comportamiento del
+portafolio.
+
+------------------------------------------------------------------------
+
+# Minimizar el VaR
+
+## Pesos
+
+```{r}
+# Extraer varianzas y covarianza desde tu matriz 'covarianza'
+var_soriana <- covarianza[1, 1]
+var_inbursa <- covarianza[2, 2]
+cov_soriana_inbursa <- covarianza[1, 2]
+
+# Cálculo de los pesos de mínima varianza
+w_soriana <- (2 * var_inbursa - 2 * cov_soriana_inbursa) /
+             (2 * var_soriana + 2 * var_inbursa - 4 * cov_soriana_inbursa)
+
+w_inbursa <- 1 - w_soriana
+
+# Mostrar resultados en porcentaje
+print(paste0("Peso Soriana: ", round(w_soriana * 100, 4), "%"))
+print(paste0("Peso Inbursa: ", round(w_inbursa * 100, 4), "%"))
+
+```
+
+## VaR del Portafolio Óptimo
+
+### Acciones
+
+```{r}
+# Valor de la posición para cada activo
+posicion_soriana <- w_soriana * vo
+posicion_inbursa <- w_inbursa * vo
+
+# Últimos precios (ya definidos)
+precio_soriana_last <- as.numeric(last(soriana_close))
+precio_inbursa_last <- as.numeric(last(ginburo_close))
+
+# Número de acciones según los pesos óptimos
+shares_soriana <- floor(posicion_soriana / precio_soriana_last)
+shares_inbursa <- floor(posicion_inbursa / precio_inbursa_last)
+
+# Resultados
+print(paste0("Número de acciones Soriana: ", shares_soriana))
+print(paste0("Número de acciones Inbursa: ", shares_inbursa))
+
+```
+
+## Volatilidad del Portafolio
+
+```{r}
+w <- as.numeric(c(w_soriana, w_inbursa))
+
+vol_opt <- sqrt(t(w) %*% covarianza %*% w)
+vol_opt <- as.numeric(vol_opt)
+vol_opt
+
+```
+
+## VaR Para 1 Día
+
+```{r}
+z_vals <- qnorm(c(0.10, 0.05, 0.01))  # niveles 90, 95, 99%
+
+VaR_param_1d <- z_vals * vol_opt * vo
+
+VaR_param_1d <- data.frame(
+  "1 Día" = VaR_param_1d
+)
+
+rownames(VaR_param_1d) <- c("VaR_90", "VaR_95", "VaR_99")
+
+VaR_param_1d
+
+```
+
+## VaR para diferentes horizontes de tiempo
+
+```{r}
+horizontes <- c(1, 5, 10, 20)
+
+VaR_param_all <- sapply(horizontes, function(h){
+  z_vals * vol_opt * vo * sqrt(h)
+})
+
+rownames(VaR_param_all) <- c("VaR_90", "VaR_95", "VaR_99")
+colnames(VaR_param_all) <- paste0(horizontes, " Días")
+
+VaR_param_all <- as.data.frame(VaR_param_all)
+VaR_param_all
+
+```
+
+## Backtesting {style="text-align: justify;"}
+
+```{r}
+g_p_opt <- na.omit(diff(shares_soriana * soriana_close +
+                        shares_inbursa * ginburo_close))
+
+vo_opt <- shares_soriana * soriana_last + shares_inbursa * ginburo_last
+
+VaR_param_opt_1d <- z_vals * vol_opt * vo_opt
+
+VaR_param_opt_1d <- data.frame("1 Día" = VaR_param_opt_1d)
+rownames(VaR_param_opt_1d) <- c("VaR_90","VaR_95","VaR_99")
+
+VaR90_opt <- VaR_param_opt_1d["VaR_90","X1.Día"]
+VaR95_opt <- VaR_param_opt_1d["VaR_95","X1.Día"]
+VaR99_opt <- VaR_param_opt_1d["VaR_99","X1.Día"]
+
+
+var_sup_90 <- backtest(g_p_opt, VaR90_opt)
+var_sup_95 <- backtest(g_p_opt, VaR95_opt)
+var_sup_99 <- backtest(g_p_opt, VaR99_opt)
+
+cat("Probabilidad de superación VaR Óptimo 90%:", round(var_sup_90, 2), "%\n")
+cat("Probabilidad de superación VaR Óptimo 95%:", round(var_sup_95, 2), "%\n")
+cat("Probabilidad de superación VaR Óptimo 99%:", round(var_sup_99, 2), "%\n")
+
+
+```
+
+El portafolio óptimo asignó 57.78% a Soriana y 42.22% a Inbursa, lo que
+permitió reducir la volatilidad respecto al portafolio inicial. Con
+estas ponderaciones, los valores de VaR disminuyeron en todos los
+niveles de confianza, mostrando un riesgo menor que en los modelos
+anteriores.
+
+El backtesting registró proporciones de 6.30%, 3.24% y 1.48% para los
+niveles del 90%, 95% y 99%, todas inferiores a los valores teóricos.
+Esto indica un comportamiento más estable y una mejora en la eficiencia
+del portafolio al aplicar la estrategia de mínima varianza.
+
+# Conclusión {style="text-align: justify;"}
+
+El análisis de VaR del portafolio compuesto por Soriana e Inbursa
+permitió comparar tres enfoques de medición de riesgo. El VaR No
+Paramétrico capturó de forma más realista la volatilidad observada en el
+mercado y presentó un backtesting alineado con los niveles teóricos de
+excepción. En contraste, el VaR Paramétrico, aunque más sencillo de
+implementar, mostró estimaciones ligeramente conservadoras debido al
+supuesto de normalidad en los rendimientos.
+
+Por otro lado, la optimización por mínima varianza redujo de manera
+efectiva la volatilidad total del portafolio, disminuyendo los niveles
+de VaR y mejorando el desempeño en el backtesting. En conjunto, los
+resultados indican que la simulación histórica representa mejor el
+comportamiento real del portafolio, mientras que la optimización
+contribuye a una gestión más eficiente del riesgo sin requerir un
+incremento en el capital invertido.
+
+# Referencias
+
+:::: {style="text-align: justify;"}
+::: {style="background-color:#f0f8ff; padding:15px; border-left:5px solid #4682b4;"}
+Yahoo Finance. (2025). *SORIANAB.MX – Organización Soriana, S.A.B. de
+C.V. Historical Data*. Recuperado de
+[https://finance.yahoo.com/quote/SORIANAB.MX](https://finance.yahoo.com/quote/SORIANAB.MX/history/?utm_source=chatgpt.com)
+
+Yahoo Finance. (2025). GFINBURO.MX – Grupo Financiero Inbursa, S.A.B. de
+C.V. Historical Data. Recuperado de
+<https://finance.yahoo.com/quote/GFINBURO.MX>
+:::
+::::

@@ -1,0 +1,143 @@
+---
+title: "HW 14"
+author: "José Armando Melchor Soto"
+format: html
+editor: visual
+---
+
+# HW 14: VaR No Param de Bonos
+
+## Libraries
+
+```{r}
+library(quantmod)
+library(lubridate)
+library(readxl)
+library(xts)
+```
+
+## Function
+
+```{r}
+precio_bono <- function(vn, tc, ti, t, m) {
+  n <- t * m               
+  c <- vn * tc / m         
+  r <- ti / m               
+  flujos <- rep(c, n)
+  flujos[n] <- flujos[n] + vn  
+  precio <- sum(flujos / (1 + r)^(1:n))
+  duracion_per <- sum((1:n) * (flujos / (1 + r)^(1:n))) / precio
+  return(list(
+    precio = precio,
+    duracion = duracion_per/m
+  ))
+}
+```
+
+## Tasas Fijas 
+
+### 5 Años
+
+```{r}
+Tasa5 <- read_xlsx("tasafija5Y.xlsx")
+
+cols_char <- sapply(Tasa5, is.character)
+Tasa5 <- Tasa5[!apply(Tasa5[, cols_char] == "N/E", 1, any), ]
+
+Tasa5$Fecha <- as.Date(Tasa5$Fecha)
+Tasa5$SF43886 <- as.numeric(gsub(",", ".", Tasa5$SF43886)) / 100
+
+Tasa5 <- to.monthly(xts(Tasa5$SF43886, order.by = Tasa5$Fecha))[,4]
+
+```
+
+### 10 Años
+
+```{r}
+Tasa10 <- read_xlsx("tasafija10Y.xlsx")
+
+cols_char <- sapply(Tasa10, is.character)
+Tasa10 <- Tasa10[!apply(Tasa10[, cols_char] == "N/E", 1, any), ]
+
+Tasa10$Fecha <- as.Date(Tasa10$Fecha)
+Tasa10$SF44071 <- as.numeric(gsub(",", ".", Tasa10$SF44071)) / 100
+
+Tasa10 <- to.monthly(xts(Tasa10$SF44071, order.by = Tasa10$Fecha))[,4]
+
+```
+
+## Empatar Tasas
+
+```{r}
+TI <- na.omit(merge.xts(Tasa5, Tasa10))
+Ti5 <- as.numeric(last(TI[,1]))
+Ti10 <- as.numeric(last(TI[,2]))
+```
+
+## Bonos
+
+```{r}
+pb5 <- precio_bono(1000000, 0.1, Ti5, 5, 2)[["precio"]]
+pb10 <- precio_bono(500000, 0.15, Ti10, 10, 2)[["precio"]]
+
+print(paste("El precio del Bono a Tasa Fija a 5 años : ", pb5))
+print(paste("El precio del Bono a Tasa Fija a 10 años : ", pb10))
+```
+
+## Simulación de Tasas
+
+```{r}
+rent5 <- diff(log(TI[,1]))
+te5 <- na.omit(Ti5*(1+rent5))
+
+rent10 <- diff(log(TI[,2]))
+te10 <- na.omit(Ti10*(1+rent10))
+```
+
+## Precio de Bonos con las tasas simuladas
+
+```{r}
+pbe5 <- matrix(0, nrow = length(te5), ncol = 1)
+for (i in 1:length(te5)) {
+  pbe5[i,1] <- precio_bono(1000000, 0.1, as.numeric(te5[i,1]), 5, 2)[["precio"]]
+}
+
+pbe10 <- matrix(0, nrow = length(te10), ncol = 1)
+for (i in 1:length(te10)) {
+  pbe10[i,1] <- precio_bono(500000, 0.15, as.numeric(te10[i,1]), 10, 2)[["precio"]]
+}
+
+vi <- pb5 + pb10
+vp <- pbe5 + pbe10
+```
+
+## Función de Ganancia y Perdida 
+
+```{r}
+fpgp <- vp - vi
+#hist(fpgp, n=20, col="cornflowerblue")
+var99 <- quantile(fpgp, 0.01)
+
+print(paste("El Var a 99% de confianza es de: ", var99))
+```
+
+## VaR Paramétrico
+
+```{r}
+corr <- cor(na.omit(rent5), na.omit(rent10))
+
+dur5 <- precio_bono(1000000, 0.1, Ti5, 5, 2)[["duracion"]]
+durm5 <- dur5/(1+Ti5)
+var5 <- qnorm(0.01)*sd(na.omit(rent5))*pb5*Ti5*durm5
+
+dur10 <- precio_bono(500000, 0.15, Ti10, 10, 2)[["duracion"]]
+durm10 <- dur10/(1+Ti10)
+var10 <- qnorm(0.01)*sd(na.omit(rent10))*pb10*Ti10*durm10
+
+matriz_var_12 <- matrix(c(var5, var10), nrow=1, ncol=2)
+matriz_cor <- matrix(c(1, corr, corr, 1), nrow=2, ncol=2)
+
+var_p <- sqrt(matriz_var_12 %*% matriz_cor %*% t(matriz_var_12))
+
+print(paste("El VaR Paramétrico es de:", var_p))
+```

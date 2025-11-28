@@ -1,0 +1,172 @@
+---
+title: "Actividad Individual"
+Author: "José Armando Melchor Soto - 745697"
+format: html
+editor: visual
+---
+
+## Actividad Individual
+
+1\) Considerar que se tienen 3 portafolios
+
+-   50 Acciones de Peñoles
+
+-   100 Acciones de Nemak
+
+-   70 acciones de GFNORTEO
+
+VaR para un dia de cada portafolio.
+
+## Libraries
+
+```{r message=FALSE}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+library(readxl)
+library(tibble)
+library(ggplot2)
+library(WDI)
+library(tidyr)
+library(moments)
+library(zoo)
+```
+
+## Assets prices
+
+```{r}
+
+first_date <- as.Date("2024-01-01")
+final_date <- as.Date("2025-11-06")
+
+tickers <- c("PE&OLES.MX", "NEMAKA.MX", "GFNORTEO.MX")
+
+precios <- list()
+
+for (tkr in tickers) {
+datos <- getSymbols(tkr, src = "yahoo", auto.assign = FALSE)
+datos <- datos[index(datos) >= first_date & index(datos) <= final_date]
+precios[[tkr]] <- Ad(datos)
+}
+
+prices <- do.call(merge, precios)
+colnames(prices) <- c("PENOLES", "NEMAKA", "GFNORTEO")
+
+prices <- na.omit(prices)
+
+head(prices)
+
+
+
+```
+
+## Rendimientos
+
+```{r}
+rend <- diff(log(prices))
+rend <- na.omit(rend)
+```
+
+## Volatilidad Diaria
+
+```{r}
+vol_diaria <- apply(rend, 2, sd, na.rm = TRUE)
+```
+
+## Nivel de Confianza
+
+```{r}
+alpha <- 0.01
+Z_alpha <- qnorm(alpha)
+```
+
+## Valor del Portafolio
+
+```{r}
+Acciones <- c(50, 100, 70)
+ultimo_precio <- as.numeric(last(prices))
+V_t <- Acciones * ultimo_precio
+V_port <- sum(V_t)
+
+```
+
+## VaR Individual
+
+```{r}
+
+VaR_ind <- Z_alpha * vol_diaria * V_t   
+print(VaR_ind)
+```
+
+2\) Considera que tiene 1 portafolio D con las sig. Activos
+
+-   50 acciones Peñoles , 100 de Nemak y 70 de GFNORTEO
+
+VaR para un día al 99% para el portafolio D
+
+## Pesos del Portafolio
+
+```{r}
+w <- V_t / V_port
+w_t <- t(w)
+```
+
+## Nivel de Confianza
+
+```{r}
+alpha <- 0.01
+Z_alpha <- qnorm(alpha)
+```
+
+## Rendimiento del Portafolio
+
+```{r}
+rend_port <- rend %*% w
+```
+
+## Matriz de Covarianza C
+
+```{r}
+C <- cov(rend, use = "complete.obs")
+```
+
+## Volatilidad del portafolio
+
+$$
+\sigma = \sqrt{w~C~w^T}
+$$
+
+```{r}
+var_port <- as.numeric(w_t %*% C %*% w)
+sigma <- sqrt(var_port)
+```
+
+## VaR Portafolio
+
+```{r}
+VaR_port <- Z_alpha * sigma * V_port 
+print(VaR_port)
+```
+
+## Comprobación Diversificación
+
+```{r}
+VaR_suma <- sum(VaR_ind)
+print(VaR_suma)
+print(VaR_port)
+```
+
+## De VaR individuales a VaR total del portafolio
+
+$$
+\sqrt{VRV^{T}}
+$$
+
+```{r}
+V <-  VaR_ind
+R <- cor(rend)
+VRV <-  sqrt(t(V) %*% R %*% V)
+VRV
+
+```

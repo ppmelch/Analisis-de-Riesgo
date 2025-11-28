@@ -1,0 +1,125 @@
+---
+title: "Actividad Individual 2"
+author: "José Armando Melchor Soto"
+format: html
+editor: visual
+---
+
+# Actividad Individual 2: VaR No Paramétrico de acciones
+
+## Actividad
+
+Estimar el VaR al 90% , 95% y 99% para un día de un portafolio con
+
+-   200 acciones de SORIANA
+
+-   300 acciones de PINFRA
+
+#### Librerias
+
+```{r message=FALSE}
+library(readr)
+library(dplyr)
+library(quantmod)
+library(lubridate)
+library(readxl)
+library(tibble)
+library(ggplot2)
+library(WDI)
+library(tidyr)
+library(moments)
+library(zoo)
+```
+
+### Precios de las Acciones
+
+```{r}
+first_date <- as.Date("2021-08-04")
+final_date <- as.Date("2025-11-10")
+
+tickers <- c("SORIANAB.MX", "PINFRA.MX")
+
+precios <- list()
+for (tkr in tickers) {
+  x <- getSymbols(tkr, src = "yahoo", auto.assign = FALSE,
+                  from = first_date, to = final_date)
+  precios[[tkr]] <- Ad(x)  # equivalente a [,6]
+}
+
+prices <- do.call(merge, precios)
+colnames(prices) <- tickers
+prices <- na.omit(prices)
+
+Acciones <- c("SORIANAB.MX" = 200, "PINFRA.MX" = 300)
+
+prices <- prices[, names(Acciones)]
+
+head(prices)
+
+```
+
+#### Calcular el valor inicial de portafolio
+
+```{r}
+So <- sum(as.numeric(last(prices)) * Acciones)
+So
+
+```
+
+#### Calcular rendimientos diarios
+
+```{r}
+rend <- na.omit(diff(log(prices)))
+```
+
+#### Estimar precio futuro de cada activo con la siguiente ecuación
+
+$$
+S_{t+1} = S_o (1+R_t)
+$$
+
+```{r}
+S_t <-  S_o*(1+rend)
+```
+
+#### Valor futuro del portafolio
+
+```{r}
+vt1 <-  sum(as.numeric(S_t))*Acciones
+fpg <-  vt1 - So
+```
+
+#### Percentiles
+
+```{r}
+alpha_99 <- 0.01
+alpha_95 <- 0.05
+alpha_90 <- 0.1
+```
+
+#### VaR's
+
+```{r}
+VaR_99 <- quantile(fpg, alpha_99)
+VaR_95 <- quantile(fpg, alpha_95)
+VaR_90 <- quantile(fpg, alpha_90)
+```
+
+#### Resultados
+
+```{r}
+cat("VaR al 99% : ", VaR_99 , "% \n")
+cat("VaR al 95% : ", VaR_95 , "% \n")
+cat("VaR al 90% : ", VaR_90 , "% \n")
+```
+
+#### Histograma
+
+```{r}
+hist(fpg, breaks = 100, main = "Histograma de Pérdidas y Ganancias Futuras", xlab = "Pérdidas y Ganancias Futuras", col = 'palevioletred')
+abline(v = VaR_90, col = "black", lwd = 2, lty = 2)
+abline(v = VaR_95, col = "black", lwd = 2, lty = 2)
+abline(v = VaR_99, col = "black", lwd = 2, lty=2)
+grid()
+
+```

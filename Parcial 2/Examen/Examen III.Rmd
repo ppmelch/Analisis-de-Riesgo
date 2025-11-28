@@ -1,0 +1,235 @@
+---
+title: "Examen Parcial 3"
+output: html_document
+author: 
+  - "Jose Armando Melchor - 745697"
+date: "2025-11-28"
+output: 
+  html_document:
+    code_folding: hide   
+    toc: true           
+    toc_float: true
+    df_print: paged 
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+library(quantmod)
+library(lubridate)
+```
+
+# Obtención de Datos
+
+```{r}
+
+BIMBO <- "BIMBOA.MX"
+GFNORTEO <- "GFNORTEO.MX"
+  
+datos <- new.env()
+getSymbols(BIMBO, env = datos , from = "2019-01-01", to = "2025-11-26")
+getSymbols(GFNORTEO, env = datos , from = "2019-01-01", to = "2025-11-26")
+
+BIMBO_close <- as.numeric(datos[[BIMBO]][,6])
+gfnorteo_close  <- as.numeric(datos[[GFNORTEO]][,6])
+
+BIMBO_close <- datos[[BIMBO]][,6]
+gfnorteo_close <- datos[[GFNORTEO]][,6]
+
+BIMBO_returns <-diff(log(BIMBO_close))
+gfnorteo_returns <- diff(log(gfnorteo_close))
+
+BIMBO_returns <- na.omit(BIMBO_returns)
+gfnorteo_returns <- na.omit(gfnorteo_returns)
+
+```
+
+## a) Valor Actual del Portafolio
+
+```{r}
+
+BIMBO_last <- as.numeric(last(BIMBO_close))
+gfnorteo_last <-  as.numeric(last(gfnorteo_close))
+
+print(paste("El precio Actual de BIMBO: ",  BIMBO_last))
+print(paste("El precio Actual de GFNORTEO: ",  gfnorteo_last))
+
+portafolio <- 180 * BIMBO_last + 320 * gfnorteo_last
+
+vo <- portafolio
+
+print(paste("Valor de portafolio actual:", round(vo, 2)))
+
+```
+
+## b) Monto del Valor Actual para cada activo
+
+```{r}
+monto_BIMBO <-  BIMBO_last * 180
+monto_gfnorteo <- gfnorteo_last * 320
+
+
+print(paste("El Monto invertido en BIMBO: ",  monto_BIMBO))
+print(paste("El Monto invertido en GFNORTEO: ",  monto_gfnorteo))
+```
+
+## c) Peso Relativo
+
+```{r}
+wr_BIMBO <-  monto_BIMBO / vo
+wr_gfnorteo <- monto_gfnorteo / vo
+
+
+print(paste("El Peso relativo en BIMBO: ",  wr_BIMBO))
+print(paste("El Peso relativo en GFNORTEO: ",  wr_gfnorteo))
+```
+
+## d) Correlación de los rendimientos Diarios de ambos activos
+
+```{r}
+correlacion <- cor(na.omit(BIMBO_returns), na.omit(gfnorteo_returns))
+print(paste("La correlación de BIMBO y GFNORTE es de : ",  correlacion))
+
+```
+
+## e) Volatilidad diaria histórica
+
+```{r}
+vol_BIMBO <-  sd(na.omit(BIMBO_returns))
+vol_gfnorteo <- sd(na.omit(gfnorteo_returns))
+
+print(paste("La Volatilidad Diaria Historica de BIMBO es de : ",  vol_BIMBO * 100 , "%"))
+print(paste("La Volatilidad Diaria Historica de GFNORTEO es de : ",  vol_gfnorteo*100 , "%"))
+
+```
+
+## h) VaR No-Parámetrico
+
+```{r}
+
+v_futuro <- 180 * BIMBO_close + 320 * gfnorteo_close
+names(v_futuro) <- "valor_p"
+BIMBO_precio_futuro <-  BIMBO_last * (1 + BIMBO_returns)
+GFNORTEO_precio_futuro <-  gfnorteo_last * (1 + gfnorteo_returns)
+
+portafolio_futuro <- 180 * BIMBO_precio_futuro + 320 * GFNORTEO_precio_futuro
+
+funcion_p_l <-  portafolio_futuro - vo
+
+
+niveles <- c(0.10, 0.05, 0.01)
+horizontes <- 1
+VaR_hist <- sapply(horizontes, function(h){quantile(funcion_p_l, probs = niveles) * sqrt(h)}) 
+rownames(VaR_hist) <- c("VaR_90", "VaR_95", "VaR_99") 
+colnames(VaR_hist) <- paste0(horizontes, " Días")  
+VaR_hist <- as.data.frame(VaR_hist)  
+VaR90 <- VaR_hist["VaR_90", "1 Días"] 
+VaR95 <- VaR_hist["VaR_95", "1 Días"] 
+VaR99 <- VaR_hist["VaR_99", "1 Días"]  
+VaR_hist
+
+```
+
+## i) Expected Shortfall (ES) / Pérdida promedio esperada
+
+```{r}
+ES_90 <- mean(funcion_p_l[funcion_p_l < VaR90])
+ES_95 <- mean(funcion_p_l[funcion_p_l < VaR95])
+ES_99 <- mean(funcion_p_l[funcion_p_l < VaR99])
+
+ES <- data.frame(ES_90 = ES_90, ES_95 = ES_95, ES_99 = ES_99)
+```
+
+## j) VaR individual diario al 99%
+
+```{r}
+Bimbo_daily <-  dailyReturn(BIMBO_close)
+GFNORTEO_daily <-  dailyReturn(gfnorteo_close)
+
+mu_BIMBO <- mean(Bimbo_daily, na.rm = TRUE)
+mu_GFNORTEO <-mean(GFNORTEO_daily, na.rm = TRUE)
+
+sd_BIMBO <- sd(Bimbo_daily, na.rm = TRUE)
+sd_GFNORTEO <- sd(GFNORTEO_daily, na.rm = TRUE)
+
+z_99 <-  qnorm(0.01)
+
+VaR99_BIMBO <- mu_BIMBO + z_99 * sd_BIMBO
+VaR99_GFNORTEO <- mu_GFNORTEO + z_99 * sd_GFNORTEO
+
+print(paste("VaR 99% BIMBO:", round(VaR99_BIMBO, 4)))
+print(paste("VaR 99% GFNORTEO:", round(VaR99_GFNORTEO, 4)))
+
+```
+
+## k) Reducir Exposicióon en un 50% del monto actual invertido en GFNORTEO y reinvertir ese monto en BIMBO ¿ Cuántas acciones tendría ahora de cada activo ?
+
+```{r}
+
+monto_gf <-  gfnorteo_last * 320
+print(paste("Monto anterior antes de la reducción : " ,monto_gf))
+
+reduccion_gf <- monto_gf * 0.5
+
+print(paste("Monto actual despues de la reducción : " ,reduccion_gf))
+
+Acciones_gd <-  reduccion_gf / gfnorteo_last
+print(paste("Acciones GFNORTEO despues de la reducción : " ,Acciones_gd))
+
+Acciones_B <-  reduccion_gf / BIMBO_last
+print(paste("Acciones BIMBO despues de la reducción : " ,Acciones_B + 180 ))
+
+
+
+```
+
+## I) Calcular el nuevo VaR al 99% de esta nueva composición y compararlo con el original . Calcular ES
+
+```{r}
+
+portafolio <- 657 * BIMBO_last + 160 * gfnorteo_last
+
+vo <- portafolio
+
+print(paste("Valor de portafolio actual:", round(vo, 2)))
+
+
+monto_BIMBO <-  BIMBO_last * 657
+monto_gfnorteo <- gfnorteo_last * 160
+
+
+print(paste("El Monto invertido en BIMBO: ",  monto_BIMBO))
+print(paste("El Monto invertido en GFNORTEO: ",  monto_gfnorteo))
+
+
+v_futuro <- 657 * BIMBO_close + 160 * gfnorteo_close
+names(v_futuro) <- "valor_p"
+BIMBO_precio_futuro <-  BIMBO_last * (1 + BIMBO_returns)
+GFNORTEO_precio_futuro <-  gfnorteo_last * (1 + gfnorteo_returns)
+
+portafolio_futuro <- 657 * BIMBO_precio_futuro + 160 * GFNORTEO_precio_futuro
+
+funcion_p_l <-  portafolio_futuro - vo
+
+
+niveles <- c(0.10, 0.05, 0.01)
+horizontes <- 1
+VaR_hist <- sapply(horizontes, function(h){quantile(funcion_p_l, probs = niveles) * sqrt(h)}) 
+rownames(VaR_hist) <- c("VaR_90", "VaR_95", "VaR_99") 
+colnames(VaR_hist) <- paste0(horizontes, " Días")  
+VaR_hist <- as.data.frame(VaR_hist)  
+VaR90 <- VaR_hist["VaR_90", "1 Días"] 
+VaR95 <- VaR_hist["VaR_95", "1 Días"] 
+VaR99 <- VaR_hist["VaR_99", "1 Días"]  
+VaR_hist
+
+
+ES_90 <- mean(funcion_p_l[funcion_p_l < VaR90])
+ES_95 <- mean(funcion_p_l[funcion_p_l < VaR95])
+ES_99 <- mean(funcion_p_l[funcion_p_l < VaR99])
+
+ES <- data.frame(ES_90 = ES_90, ES_95 = ES_95, ES_99 = ES_99)
+ES
+
+```
